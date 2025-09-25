@@ -34,28 +34,45 @@ api.interceptors.response.use(
     console.log('❌ Error details:', error.response?.data)
 
     if (typeof window !== 'undefined' && error.response?.status === 401) {
-      // Emit a global event so UI/auth layer can handle sign-out gracefully
-      try {
-        window.dispatchEvent(new Event('auth-unauthorized'))
-      } catch {}
+      // Only clear auth on 401 if it's not a profile validation request
+      const isProfileRequest = error.config?.url?.includes('/auth/profile')
+      if (!isProfileRequest) {
+        console.log('❌ 401 error on non-profile request, clearing auth')
+        try {
+          window.dispatchEvent(new Event('auth-unauthorized'))
+        } catch {}
+      }
     }
     return Promise.reject(error)
   },
 )
 
 // API Types
+export type ArticleStatus = "draft" | "submitted" | "under_review" | "revision_requested" | "accepted" | "published" | "rejected"
+export type VolumeStatus = "draft" | "in_progress" | "published" | "archived"
+
 export interface Volume {
   _id: string
-  number: number
+  volume: number
+  issue?: number
   year: number
   title: string
-  description: string
+  description?: string
+  status: VolumeStatus
   coverImage?: string
-  publishedDate: Date
-  status: "draft" | "published" | "archived"
-  issues: Issue[]
-  totalArticles: number
-  totalPages: number
+  publishDate?: Date
+  doi?: string
+  pages?: string
+  articles?: string[]  // Array of article IDs
+  editor?: string     // Editor user ID
+  issn?: string
+  isbn?: string
+  featured?: boolean
+  downloadCount?: number
+  viewCount?: number
+  // Computed fields (added by backend)
+  totalArticles?: number
+  totalPages?: number
 }
 
 export interface Issue {
@@ -74,13 +91,13 @@ export interface Article {
   authors: Author[]
   keywords: string[]
   doi?: string
-  pages: { start: number; end: number }
+  pages?: string  // Page range as string (e.g., "123-145")
   submissionDate: Date
   publishedDate?: Date
-  status: string
+  status: ArticleStatus
   files: ArticleFile[]
-  volume: string
-  issue: string
+  volume: Volume | string  // Can be populated object or just ID
+  issue?: number  // Issue number
   articleNumber?: string
   manuscriptFile?: any
   supplementaryFiles?: any[]
@@ -91,6 +108,7 @@ export interface Article {
   funding?: string
   acknowledgments?: string
   conflictOfInterest?: string
+  featured?: boolean
 }
 
 export interface Author {
@@ -98,7 +116,7 @@ export interface Author {
   firstName: string
   lastName: string
   email: string
-  affiliation: string
+  affiliation?: string
   orcid?: string
 }
 
@@ -131,15 +149,37 @@ export interface JournalStatistics {
   totalUsers: number
 }
 
+// Create Volume DTO interface to match backend exactly
+export interface CreateVolumeDto {
+  volume: number
+  issue?: number
+  year: number
+  title: string
+  description?: string
+  status: VolumeStatus
+  coverImage?: string
+  publishDate?: string
+  doi?: string
+  pages?: string
+  editor?: string
+  issn?: string
+  isbn?: string
+  featured?: boolean
+}
+
 // API Services
 export const volumeService = {
   getAll: () => api.get<Volume[]>("/volumes"),
   getById: (id: string) => api.get<Volume>(`/volumes/${id}`),
-  create: (data: Partial<Volume>) => api.post<Volume>("/volumes", data),
-  update: (id: string, data: Partial<Volume>) => api.put<Volume>(`/volumes/${id}`, data),
+  create: (data: CreateVolumeDto) => api.post<Volume>("/volumes", data),
+  update: (id: string, data: Partial<Volume>) => api.patch<Volume>(`/volumes/${id}`, data),
+  updateStatus: (id: string, status: string) => api.patch<Volume>(`/volumes/${id}/status`, { status }),
   delete: (id: string) => api.delete(`/volumes/${id}`),
   getCurrent: () => api.get<Volume>("/volumes/current"),
   getRecent: (limit = 4) => api.get<Volume[]>(`/volumes/recent?limit=${limit}`),
+  assignArticles: (id: string, articleIds: string[]) => api.post(`/volumes/${id}/articles`, { articleIds }),
+  removeArticle: (id: string, articleId: string) => api.delete(`/volumes/${id}/articles/${articleId}`),
+  getArticles: (id: string) => api.get(`/volumes/${id}/articles`),
 }
 
 export const articleService = {
@@ -150,7 +190,7 @@ export const articleService = {
     api.get<Article>(`/articles/volume/${volumeNumber}/article/${articleNumber}`),
   getFeatured: (limit = 6) => api.get<Article[]>(`/articles/featured?limit=${limit}`),
   create: (data: Partial<Article>) => api.post<Article>("/articles", data),
-  update: (id: string, data: Partial<Article>) => api.put<Article>(`/articles/${id}`, data),
+  update: (id: string, data: Partial<Article>) => api.patch<Article>(`/articles/${id}`, data),
   updateArticleNumber: (id: string, articleNumber: string) => 
     api.patch<Article>(`/articles/${id}/article-number`, { articleNumber }),
   delete: (id: string) => api.delete(`/articles/${id}`),
@@ -161,7 +201,7 @@ export const newsService = {
   getById: (id: string) => api.get<NewsItem>(`/news/${id}`),
   getFeatured: (limit = 5) => api.get<NewsItem[]>(`/news/featured?limit=${limit}`),
   create: (data: Partial<NewsItem>) => api.post<NewsItem>("/news", data),
-  update: (id: string, data: Partial<NewsItem>) => api.put<NewsItem>(`/news/${id}`, data),
+  update: (id: string, data: Partial<NewsItem>) => api.patch<NewsItem>(`/news/${id}`, data),
   delete: (id: string) => api.delete(`/news/${id}`),
 }
 

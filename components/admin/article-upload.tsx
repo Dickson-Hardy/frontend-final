@@ -97,12 +97,32 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
     try {
       const formDataToSend = new FormData()
       
-      // Add article metadata
-      Object.keys(formData).forEach(key => {
-        if (formData[key as keyof typeof formData]) {
-          formDataToSend.append(key, formData[key as keyof typeof formData])
-        }
-      })
+      // Add article metadata with proper field mapping
+      formDataToSend.append('title', formData.title)
+      formDataToSend.append('abstract', formData.abstract)
+      formDataToSend.append('content', formData.abstract) // Use abstract as content for now
+      formDataToSend.append('type', formData.researchType || 'research')
+      
+      // Handle keywords - ensure it's an array
+      const keywordsArray = formData.keywords 
+        ? formData.keywords.split(',').map(k => k.trim()).filter(k => k)
+        : []
+      formDataToSend.append('keywords', JSON.stringify(keywordsArray))
+      
+      // Ensure corresponding author email is provided
+      formDataToSend.append('correspondingAuthorEmail', formData.correspondingAuthor)
+      
+      // Convert authors string to array format
+      const authorsArray = formData.authors.split(',').map(author => ({
+        name: author.trim(),
+        email: formData.correspondingAuthor,
+        affiliation: ''
+      }))
+      formDataToSend.append('authors', JSON.stringify(authorsArray))
+      
+      if (formData.volumeId) formDataToSend.append('volume', formData.volumeId)
+      if (formData.funding) formDataToSend.append('funding', formData.funding)
+      if (formData.acknowledgments) formDataToSend.append('acknowledgments', formData.acknowledgments)
 
       // Add files
       uploadedFiles.forEach((file, index) => {
@@ -147,7 +167,8 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
         throw new Error('Upload failed')
       })
 
-      xhr.open('POST', '/api/v1/articles')
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      xhr.open('POST', `${API_BASE_URL}/api/v1/articles`)
       xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('auth_token')}`)
       xhr.send(formDataToSend)
 
@@ -161,10 +182,10 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
 
   const isFormValid = () => {
     return (
-      formData.title &&
-      formData.abstract &&
-      formData.category &&
-      formData.authors &&
+      formData.title?.trim() &&
+      formData.abstract?.trim() &&
+      formData.authors?.trim() &&
+      formData.correspondingAuthor?.trim() &&
       uploadedFiles.length > 0
     )
   }
@@ -254,12 +275,14 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
               </div>
 
               <div>
-                <Label htmlFor="correspondingAuthor">Corresponding Author</Label>
+                <Label htmlFor="correspondingAuthor">Corresponding Author Email *</Label>
                 <Input
                   id="correspondingAuthor"
                   value={formData.correspondingAuthor}
                   onChange={(e) => handleInputChange('correspondingAuthor', e.target.value)}
                   placeholder="Enter corresponding author email"
+                  type="email"
+                  required
                 />
               </div>
             </div>

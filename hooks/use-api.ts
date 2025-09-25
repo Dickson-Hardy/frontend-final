@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { volumeService, articleService, newsService, type Volume, type Article, type NewsItem } from "@/lib/api"
+import { volumeService, articleService, newsService, type Volume, type Article, type NewsItem, type CreateVolumeDto } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
 
@@ -29,9 +29,11 @@ export const useCreateVolume = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: Partial<Volume>) => volumeService.create(data),
+    mutationFn: (data: CreateVolumeDto) => volumeService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["volumes"] })
+      queryClient.invalidateQueries({ queryKey: ["volumes", "current"] })
+      queryClient.invalidateQueries({ queryKey: ["volumes", "recent"] })
       toast({ title: "Volume created successfully" })
     },
     onError: () => {
@@ -47,6 +49,8 @@ export const useUpdateVolume = () => {
     mutationFn: ({ id, data }: { id: string; data: Partial<Volume> }) => volumeService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["volumes"] })
+      queryClient.invalidateQueries({ queryKey: ["volumes", "current"] })
+      queryClient.invalidateQueries({ queryKey: ["volumes", "recent"] })
       toast({ title: "Volume updated successfully" })
     },
     onError: () => {
@@ -66,7 +70,7 @@ export const useFeaturedArticles = (limit = 6) => {
 export const useArticlesByVolume = (volumeId: string) => {
   return useQuery({
     queryKey: ["articles", "volume", volumeId],
-    queryFn: () => articleService.getByVolume(volumeId).then((res) => res.data),
+    queryFn: () => articleService.getByVolume(parseInt(volumeId)).then((res) => res.data),
     enabled: !!volumeId,
   })
 }
@@ -78,10 +82,31 @@ export const useCreateArticle = () => {
     mutationFn: (data: Partial<Article>) => articleService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["articles"] })
+      queryClient.invalidateQueries({ queryKey: ["articles", "featured"] })
       toast({ title: "Article created successfully" })
     },
     onError: () => {
       toast({ title: "Failed to create article", variant: "destructive" })
+    },
+  })
+}
+
+export const useAssignArticles = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ volumeId, articleIds }: { volumeId: string; articleIds: string[] }) => 
+      volumeService.assignArticles(volumeId, articleIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["volumes"] })
+      queryClient.invalidateQueries({ queryKey: ["volumes", "current"] })
+      queryClient.invalidateQueries({ queryKey: ["volumes", "recent"] })
+      queryClient.invalidateQueries({ queryKey: ["articles"] })
+      queryClient.invalidateQueries({ queryKey: ["articles", "featured"] })
+      toast({ title: "Articles assigned successfully" })
+    },
+    onError: () => {
+      toast({ title: "Failed to assign articles", variant: "destructive" })
     },
   })
 }
@@ -136,6 +161,7 @@ export const useApi = <T = any>(endpoint: string, options?: any) => {
   return useQuery<T>({
     queryKey: [endpoint],
     queryFn: () => api.get(endpoint).then((res) => res.data),
+    enabled: !!endpoint && endpoint.trim() !== '',
     ...options,
   })
 }

@@ -131,7 +131,7 @@ export function ArticleNumberAssignment({ onClose }: ArticleNumberAssignmentProp
             </SelectTrigger>
             <SelectContent>
               {volumesLoading ? (
-                <SelectItem value="" disabled>
+                <SelectItem value="loading" disabled>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Loading volumes...
                 </SelectItem>
@@ -156,7 +156,7 @@ export function ArticleNumberAssignment({ onClose }: ArticleNumberAssignmentProp
               </SelectTrigger>
               <SelectContent>
                 {articlesLoading ? (
-                  <SelectItem value="" disabled>
+                  <SelectItem value="loading" disabled>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     Loading articles...
                   </SelectItem>

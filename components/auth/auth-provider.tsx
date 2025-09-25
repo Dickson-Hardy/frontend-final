@@ -53,24 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!isMounted) return
 
         if (token && storedUser) {
-          // Optimistically set user from storage to prevent flicker/bounce
-          setUser(storedUser)
-          console.log('🔍 Validating token with backend...')
-          // Verify token is still valid by fetching profile
-          try {
-            const currentUser = await getProfile()
-            console.log('✅ Token validation successful:', currentUser)
-            if (isMounted) {
-              setUser(currentUser)
-            }
-          } catch (error) {
-            console.log('❌ Token validation failed:', error)
-            console.log('❌ Error details:', error)
-            // Token is invalid, clear auth data
-            clearAuthData()
-            if (isMounted) {
-              setUser(null)
-            }
+          console.log('✅ Setting user from storage immediately')
+          if (isMounted) {
+            setUser(storedUser)
           }
         } else {
           console.log('ℹ️ No token or user found, setting user to null')

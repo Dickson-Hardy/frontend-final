@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Plus, Minus, FileText, User, Calendar, Eye, Loader2 } from "lucide-react"
-import { useApi } from "@/hooks/use-api"
+import { useApi, useAssignArticles } from "@/hooks/use-api"
+import { volumeService } from "@/lib/api"
 
 interface ArticleAssignmentProps {
   volumeId: string
@@ -22,18 +23,24 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedArticles, setSelectedArticles] = useState<string[]>([])
-  const [isAssigning, setIsAssigning] = useState(false)
 
   const { data: volumeData, isLoading: volumeLoading } = useApi(`/volumes/${volumeId}`)
   const { data: availableArticlesData, isLoading: articlesLoading } = useApi(`/articles/available-for-volume?volumeId=${volumeId}&search=${searchTerm}&category=${selectedCategory}&status=${selectedStatus}`)
   const { data: assignedArticlesData, isLoading: assignedLoading } = useApi(`/volumes/${volumeId}/articles`)
   const { data: categoriesData } = useApi('/articles/categories')
 
+  const assignArticlesMutation = useAssignArticles()
+
   // Default values and type safety
   const volume = volumeData || {} as any
-  const availableArticles = Array.isArray(availableArticlesData) ? availableArticlesData : []
+  const availableArticles = availableArticlesData?.articles || []
   const assignedArticles = Array.isArray(assignedArticlesData) ? assignedArticlesData : []
   const categories = Array.isArray(categoriesData) ? categoriesData : []
+
+  // Debug logging
+  console.log('📝 Available articles:', availableArticles)
+  console.log('📝 Assigned articles:', assignedArticles)
+  console.log('📝 Volume data:', volume)
 
   const handleArticleSelect = (articleId: string, selected: boolean) => {
     if (selected) {
@@ -45,7 +52,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
 
   const handleSelectAll = (articles: any[], selected: boolean) => {
     if (selected) {
-      setSelectedArticles(articles.map(article => article.id))
+      setSelectedArticles(articles.map(article => article._id || article.id))
     } else {
       setSelectedArticles([])
     }
@@ -54,42 +61,21 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
   const handleAssignArticles = async () => {
     if (selectedArticles.length === 0) return
 
-    setIsAssigning(true)
     try {
-      const response = await fetch(`/api/v1/volumes/${volumeId}/articles`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify({ articleIds: selectedArticles })
-      })
-
-      if (response.ok) {
-        setSelectedArticles([])
-        onAssignmentComplete?.()
-      } else {
-        throw new Error('Failed to assign articles')
-      }
-    } catch (error) {
+      console.log('🔄 Assigning articles:', { volumeId, articleIds: selectedArticles })
+      await assignArticlesMutation.mutateAsync({ volumeId, articleIds: selectedArticles })
+      setSelectedArticles([])
+      onAssignmentComplete?.()
+    } catch (error: any) {
       console.error('Error assigning articles:', error)
-    } finally {
-      setIsAssigning(false)
+      console.error('Error response:', error.response?.data)
     }
   }
 
   const handleRemoveArticle = async (articleId: string) => {
     try {
-      const response = await fetch(`/api/v1/volumes/${volumeId}/articles/${articleId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      })
-
-      if (response.ok) {
-        onAssignmentComplete?.()
-      }
+      await volumeService.removeArticle(volumeId, articleId)
+      onAssignmentComplete?.()
     } catch (error) {
       console.error('Error removing article:', error)
     }
@@ -140,7 +126,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            {volume?.number || 'Volume Information'}
+            Volume {volume?.volume || 'N/A'} {volume?.issue ? `Issue ${volume.issue}` : ''}
           </CardTitle>
           <CardDescription>{volume?.title || 'No title available'}</CardDescription>
         </CardHeader>
@@ -153,8 +139,8 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
               </Badge>
             </div>
             <div>
-              <span className="font-medium">Editor:</span>
-              <p>{volume?.editor || 'Not assigned'}</p>
+              <span className="font-medium">Year:</span>
+              <p>{volume?.year || 'N/A'}</p>
             </div>
             <div>
               <span className="font-medium">Assigned Articles:</span>
@@ -162,7 +148,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
             </div>
             <div>
               <span className="font-medium">Publication Date:</span>
-              <p>{volume?.plannedPublicationDate ? new Date(volume.plannedPublicationDate).toLocaleDateString() : "TBD"}</p>
+              <p>{volume?.publishDate ? new Date(volume.publishDate).toLocaleDateString() : "TBD"}</p>
             </div>
           </div>
         </CardContent>
@@ -198,7 +184,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
                       {categories.map((category: string) => (
-                        <SelectItem key={category} value={category.toLowerCase().replace(" ", "-")}>
+                        <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
                       ))}
@@ -258,10 +244,10 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
               ) : (
                 <div className="space-y-4">
                   {availableArticles.map((article: any) => (
-                    <div key={article.id} className="flex items-start gap-4 p-4 border rounded-lg">
+                    <div key={article._id || article.id} className="flex items-start gap-4 p-4 border rounded-lg">
                       <Checkbox
-                        checked={selectedArticles.includes(article.id)}
-                        onCheckedChange={(checked) => handleArticleSelect(article.id, checked as boolean)}
+                        checked={selectedArticles.includes(article._id || article.id)}
+                        onCheckedChange={(checked) => handleArticleSelect(article._id || article.id, checked as boolean)}
                       />
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
@@ -270,23 +256,23 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                             <Badge className={getCategoryColor(article.category)}>
                               {article.category}
                             </Badge>
-                            <Badge className={getStatusColor(article.status)}>
-                              {article.status.replace("_", " ")}
+                            <Badge className={getStatusColor(article.status || 'unknown')}>
+                              {(article.status || 'unknown').replace("_", " ")}
                             </Badge>
                           </div>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            <span>{article.authors}</span>
+                            <span>{Array.isArray(article.authors) ? article.authors.map((a: any) => `${a.firstName} ${a.lastName}`).join(', ') : 'Unknown Author'}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>{new Date(article.submissionDate).toLocaleDateString()}</span>
+                            <span>{article.submissionDate ? new Date(article.submissionDate).toLocaleDateString() : 'N/A'}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Eye className="h-4 w-4" />
-                            <span>{article.viewCount} views</span>
+                            <span>{article.viewCount || 0} views</span>
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">{article.abstract}</p>
@@ -307,8 +293,8 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                     <p className="font-medium">{selectedArticles.length} article(s) selected</p>
                     <p className="text-sm text-muted-foreground">Ready to assign to volume</p>
                   </div>
-                  <Button onClick={handleAssignArticles} disabled={isAssigning}>
-                    {isAssigning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button onClick={handleAssignArticles} disabled={assignArticlesMutation.isPending}>
+                    {assignArticlesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Assign Selected Articles
                   </Button>
                 </div>
@@ -336,7 +322,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
               ) : (
                 <div className="space-y-4">
                   {assignedArticles.map((article: any) => (
-                    <div key={article.id} className="flex items-start justify-between p-4 border rounded-lg">
+                    <div key={article._id || article.id} className="flex items-start justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-semibold text-lg">{article.title}</h3>
@@ -344,19 +330,19 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                             <Badge className={getCategoryColor(article.category)}>
                               {article.category}
                             </Badge>
-                            <Badge className={getStatusColor(article.status)}>
-                              {article.status.replace("_", " ")}
+                            <Badge className={getStatusColor(article.status || 'unknown')}>
+                              {(article.status || 'unknown').replace("_", " ")}
                             </Badge>
                           </div>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            <span>{article.authors}</span>
+                            <span>{Array.isArray(article.authors) ? article.authors.map((a: any) => `${a.firstName} ${a.lastName}`).join(', ') : 'Unknown Author'}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>Assigned: {new Date(article.assignedDate).toLocaleDateString()}</span>
+                            <span>Submitted: {article.submissionDate ? new Date(article.submissionDate).toLocaleDateString() : 'N/A'}</span>
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">{article.abstract}</p>
@@ -365,7 +351,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleRemoveArticle(article.id)}
+                          onClick={() => handleRemoveArticle(article._id || article.id)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Minus className="h-4 w-4" />

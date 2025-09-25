@@ -23,12 +23,32 @@ export function CurrentVolume() {
     )
   }
 
-  if (currentError || !currentVolume) {
+  if (currentError) {
     return (
       <section className="py-24 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
             <p className="text-muted-foreground">Unable to load volume information at this time.</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // If no current volume, show a message instead of crashing
+  if (!currentVolume) {
+    return (
+      <section className="py-24 bg-secondary/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <Book className="w-4 h-4 mr-2" />
+              Current Issue
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 text-balance">Latest Journal Volume</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+              No published volumes are currently available. Check back soon for our latest publications.
+            </p>
           </div>
         </div>
       </section>
@@ -90,7 +110,7 @@ export function CurrentVolume() {
                   </div>
                   <div className="text-center p-4 bg-background rounded-lg border border-border/50">
                     <Calendar className="w-6 h-6 text-primary mx-auto mb-2" />
-                    <div className="text-lg font-bold">{format(new Date(currentVolume.publishedDate), "MMM yyyy")}</div>
+                    <div className="text-lg font-bold">{currentVolume.publishedDate ? format(new Date(currentVolume.publishedDate), "MMM yyyy") : 'TBD'}</div>
                     <div className="text-xs text-muted-foreground">Published</div>
                   </div>
                   <div className="text-center p-4 bg-background rounded-lg border border-border/50">
@@ -166,7 +186,7 @@ export function CurrentVolume() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {format(new Date(volume.publishedDate), "MMM yyyy")}
+                        {volume.publishedDate ? format(new Date(volume.publishedDate), "MMM yyyy") : 'TBD'}
                       </div>
                     </div>
                     <div className="text-xs font-mono text-muted-foreground truncate">

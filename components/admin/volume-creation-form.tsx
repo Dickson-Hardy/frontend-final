@@ -13,6 +13,8 @@ import { CalendarIcon, Plus, X, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useApi } from "@/hooks/use-api"
+import { volumeService, type CreateVolumeDto, type VolumeStatus } from "@/lib/api"
+import { toast } from "@/hooks/use-toast"
 
 interface VolumeCreationFormProps {
   onSuccess?: () => void
@@ -29,18 +31,18 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
     description: "",
     editor: "",
     plannedPublicationDate: undefined as Date | undefined,
-    status: "planned" as "planned" | "in_progress" | "published",
+    status: "draft" as VolumeStatus,
     specialIssue: false,
     specialIssueTheme: "",
     keywords: [] as string[],
     newKeyword: "",
+    hasIssues: true, // New field to track if volume has issues
   })
 
-  const { data: editorsData } = useApi('/admin/editors')
   const { data: existingVolumesData } = useApi('/volumes')
 
   // Default values and type safety
-  const editors = Array.isArray(editorsData) ? editorsData : [] as any[]
+  const editors = [] as any[] // Remove editors for now
   const existingVolumes = Array.isArray(existingVolumesData) ? existingVolumesData : [] as any[]
 
   const handleInputChange = (field: string, value: any) => {
@@ -68,44 +70,91 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
     e.preventDefault()
     setIsSubmitting(true)
 
+    // Validate required fields before submission
+    if (!formData.volumeNumber || !formData.title || !formData.year) {
+      toast({
+        title: "Missing Required Fields",
+        description: "Please fill in all required fields (Volume Number, Title, Year).",
+        variant: "destructive"
+      })
+      setIsSubmitting(false)
+      return
+    }
+
+    // Validate volume number is a valid integer
+    const volumeNumber = parseInt(formData.volumeNumber)
+    if (isNaN(volumeNumber) || volumeNumber <= 0) {
+      toast({
+        title: "Invalid Volume Number",
+        description: "Please enter a valid volume number.",
+        variant: "destructive"
+      })
+      setIsSubmitting(false)
+      return
+    }
+
     try {
       const volumeData = {
-        ...formData,
-        plannedPublicationDate: formData.plannedPublicationDate?.toISOString(),
-        volumeId: `VOL-${formData.year}-${formData.issueNumber}`,
-        number: `Volume ${formData.volumeNumber}, Issue ${formData.issueNumber}`,
+        volume: volumeNumber,
+        year: formData.year,
+        title: formData.title.trim(),
+        status: formData.status,
+        ...(formData.hasIssues && formData.issueNumber && { issue: parseInt(formData.issueNumber) }),
+        ...(formData.description?.trim() && { description: formData.description.trim() }),
+        ...(formData.editor && formData.editor !== "none" && { editor: formData.editor }),
+        ...(formData.plannedPublicationDate && { publishDate: formData.plannedPublicationDate.toISOString().split('T')[0] }),
       }
 
-      const response = await fetch('/api/v1/volumes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify(volumeData)
-      })
+      console.log('📝 Volume data being sent:', volumeData)
+      console.log('📝 Volume data type:', typeof volumeData)
+      console.log('📝 Volume data keys:', Object.keys(volumeData))
 
-      if (response.ok) {
+      const response = await volumeService.create(volumeData)
+      
+      if (response.data) {
+        toast({
+          title: "Volume Created Successfully",
+          description: "The new volume has been created and is ready for content."
+        })
         onSuccess?.()
-      } else {
-        throw new Error('Failed to create volume')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating volume:', error)
+      console.error('Error response data:', error.response?.data)
+      console.error('Error response status:', error.response?.status)
+      
+      // Handle validation errors
+      if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
+        console.log('📝 Validation errors:', error.response.data.message)
+        const validationErrors = error.response.data.message.join(', ')
+        toast({
+          title: "Validation Error",
+          description: validationErrors,
+          variant: "destructive"
+        })
+      } else {
+        console.log('📝 Error message:', error.response?.data?.message)
+        toast({
+          title: "Error Creating Volume",
+          description: error.response?.data?.message || "Failed to create volume. Please try again.",
+          variant: "destructive"
+        })
+      }
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const isFormValid = () => {
-    return (
+    const baseValidation = (
       formData.volumeNumber &&
-      formData.issueNumber &&
-      formData.title &&
-      formData.description &&
-      formData.editor &&
-      formData.plannedPublicationDate
+      formData.title
     )
+    
+    // If volume has issues, issue number is required
+    const issueValidation = !formData.hasIssues || formData.issueNumber
+    
+    return baseValidation && issueValidation
   }
 
   return (
@@ -134,16 +183,6 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
               />
             </div>
             <div>
-              <Label htmlFor="issueNumber">Issue Number *</Label>
-              <Input
-                id="issueNumber"
-                value={formData.issueNumber}
-                onChange={(e) => handleInputChange('issueNumber', e.target.value)}
-                placeholder="e.g., 3"
-                required
-              />
-            </div>
-            <div>
               <Label htmlFor="year">Year *</Label>
               <Input
                 id="year"
@@ -155,7 +194,33 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
                 required
               />
             </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="hasIssues"
+                  checked={formData.hasIssues}
+                  onChange={(e) => handleInputChange('hasIssues', e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="hasIssues">This volume has issues</Label>
+              </div>
+            </div>
           </div>
+
+          {/* Issue Number - Only show if volume has issues */}
+          {formData.hasIssues && (
+            <div>
+              <Label htmlFor="issueNumber">Issue Number *</Label>
+              <Input
+                id="issueNumber"
+                value={formData.issueNumber}
+                onChange={(e) => handleInputChange('issueNumber', e.target.value)}
+                placeholder="e.g., 3"
+                required
+              />
+            </div>
+          )}
 
           {/* Title and Description */}
           <div className="space-y-4">
@@ -170,14 +235,13 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
               />
             </div>
             <div>
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="description">Description (Optional)</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Describe the focus and scope of this volume..."
                 rows={4}
-                required
               />
             </div>
           </div>
@@ -185,12 +249,13 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
           {/* Editor and Publication Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="editor">Assigned Editor *</Label>
+              <Label htmlFor="editor">Assigned Editor (Optional)</Label>
               <Select value={formData.editor} onValueChange={(value) => handleInputChange('editor', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select an editor" />
+                  <SelectValue placeholder="Select an editor (optional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">No editor assigned</SelectItem>
                   {editors.map((editor: any) => (
                     <SelectItem key={editor.id} value={editor.id}>
                       {editor.name} ({editor.role})
@@ -200,7 +265,7 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
               </Select>
             </div>
             <div>
-              <Label>Planned Publication Date *</Label>
+              <Label>Planned Publication Date (Optional)</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -238,9 +303,10 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="planned">Planned</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
           </div>

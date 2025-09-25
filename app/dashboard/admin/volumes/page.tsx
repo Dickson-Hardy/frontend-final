@@ -8,21 +8,40 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Plus, Edit, Trash2, Search, Calendar, FileText, Users, Building, Upload, Loader2 } from "lucide-react"
 import { VolumeCreationForm } from "@/components/admin/volume-creation-form"
 import { ArticleAssignment } from "@/components/admin/article-assignment"
 import { ArticleUpload } from "@/components/admin/article-upload"
 import { useApi } from "@/hooks/use-api"
+import { volumeService } from "@/lib/api"
+import { toast } from "@/hooks/use-toast"
 
 export default function AdminVolumesPage() {
   const [activeTab, setActiveTab] = useState("volumes")
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedVolume, setSelectedVolume] = useState<string | null>(null)
+  const [editingVolume, setEditingVolume] = useState<any>(null)
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
+  const [deletingVolume, setDeletingVolume] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [yearFilter, setYearFilter] = useState("all")
 
-  const { data: volumes, isLoading: volumesLoading, refetch: refetchVolumes } = useApi(`/volumes?search=${searchTerm}&status=${statusFilter}&year=${yearFilter}`)
+  const { data: volumesData, isLoading: volumesLoading, refetch: refetchVolumes } = useApi(`/volumes`)
+
+  // Filter volumes based on search and filters
+  const volumes = volumesData?.filter((volume: any) => {
+    const matchesSearch = !searchTerm || 
+      volume.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      volume.volume?.toString().includes(searchTerm) ||
+      volume.year?.toString().includes(searchTerm)
+    
+    const matchesStatus = statusFilter === 'all' || volume.status === statusFilter
+    const matchesYear = yearFilter === 'all' || volume.year?.toString() === yearFilter
+    
+    return matchesSearch && matchesStatus && matchesYear
+  }) || []
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -46,6 +65,33 @@ export default function AdminVolumesPage() {
 
   const handleAssignmentComplete = () => {
     refetchVolumes()
+  }
+
+  const handleStatusUpdate = async (volumeId: string, newStatus: string) => {
+    setUpdatingStatus(volumeId)
+    try {
+      await volumeService.updateStatus(volumeId, newStatus)
+      toast({ title: "Status updated successfully" })
+      refetchVolumes()
+    } catch (error) {
+      toast({ title: "Failed to update status", variant: "destructive" })
+    } finally {
+      setUpdatingStatus(null)
+    }
+  }
+
+  const handleDeleteVolume = async (volumeId: string) => {
+    if (!confirm('Are you sure you want to delete this volume?')) return
+    setDeletingVolume(volumeId)
+    try {
+      await volumeService.delete(volumeId)
+      toast({ title: "Volume deleted successfully" })
+      refetchVolumes()
+    } catch (error) {
+      toast({ title: "Failed to delete volume", variant: "destructive" })
+    } finally {
+      setDeletingVolume(null)
+    }
   }
 
   return (
@@ -153,12 +199,12 @@ export default function AdminVolumesPage() {
               </div>
             ) : (
               volumes?.map((volume: any) => (
-                <Card key={volume.id}>
+                <Card key={volume._id || volume.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold">{volume.number}</h3>
+                          <h3 className="text-xl font-semibold">Volume {volume.volume} {volume.issue ? `Issue ${volume.issue}` : ''}</h3>
                           <Badge className={getStatusColor(volume.status)}>
                             {volume.status.replace("_", " ")}
                           </Badge>
@@ -169,43 +215,68 @@ export default function AdminVolumesPage() {
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                           <div>
-                            <span className="font-medium">Editor:</span>
-                            <p>{volume.editor}</p>
+                            <span className="font-medium">Year:</span>
+                            <p>{volume.year}</p>
                           </div>
                           <div>
                             <span className="font-medium">Articles:</span>
                             <p>{volume.articles?.length || 0}</p>
                           </div>
                           <div>
-                            <span className="font-medium">Pages:</span>
-                            <p>{volume.pages || 0}</p>
+                            <span className="font-medium">Status:</span>
+                            <p>{volume.status?.replace('_', ' ') || 'Draft'}</p>
                           </div>
                           <div>
                             <span className="font-medium">Published:</span>
-                            <p>{volume.publishedDate ? new Date(volume.publishedDate).toLocaleDateString() : "Not yet published"}</p>
+                            <p>{volume.publishDate ? new Date(volume.publishDate).toLocaleDateString() : "Not yet published"}</p>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 ml-4">
-                        <Button variant="outline" size="sm" className="gap-2">
-                          <Edit className="h-4 w-4" />
-                          Edit
-                        </Button>
+                        <Select 
+                          value={volume.status} 
+                          onValueChange={(value) => handleStatusUpdate(volume._id, value)}
+                          disabled={updatingStatus === volume._id}
+                        >
+                          <SelectTrigger className="w-32">
+                            {updatingStatus === volume._id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <SelectValue />
+                            )}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                            <SelectItem value="archived">Archived</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           className="gap-2"
                           onClick={() => {
-                            setSelectedVolume(volume.id)
+                            setSelectedVolume(volume._id || volume.id)
                             setActiveTab("assign")
                           }}
                         >
                           <FileText className="h-4 w-4" />
                           Manage Articles
                         </Button>
-                        <Button variant="outline" size="sm" className="gap-2 text-red-600 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="gap-2 text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteVolume(volume._id)}
+                          disabled={deletingVolume === volume._id}
+                        >
+                          {deletingVolume === volume._id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                           Delete
                         </Button>
                       </div>

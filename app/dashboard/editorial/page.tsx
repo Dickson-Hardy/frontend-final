@@ -158,63 +158,64 @@ export default function EditorialDashboard() {
               <p className="text-muted-foreground">No manuscripts in queue</p>
             </div>
           ) : (
-            editorialQueue?.map((manuscript) => (
-            <Card key={manuscript.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{manuscript.title}</h3>
-                      <Badge className={getStatusColor(manuscript.status)}>
-                        {manuscript.status.replace("_", " ")}
-                      </Badge>
-                      <Badge className={getPriorityColor(manuscript.priority)}>
-                        {manuscript.priority} priority
-                      </Badge>
+            editorialQueue?.map((manuscript: any) => (
+              <Card key={manuscript.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-lg">{manuscript.title}</h3>
+                        <Badge className={getStatusColor(manuscript.status)}>
+                          {manuscript.status.replace("_", " ")}
+                        </Badge>
+                        <Badge className={getPriorityColor(manuscript.priority)}>
+                          {manuscript.priority} priority
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground mb-4">
+                        <div>
+                          <span className="font-medium">Authors:</span>
+                          <p>{manuscript.authors}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Category:</span>
+                          <p>{manuscript.category}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Submitted:</span>
+                          <p>{new Date(manuscript.submittedDate).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Days in Queue:</span>
+                          <p className="text-orange-600 font-medium">{manuscript.daysInQueue}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="text-muted-foreground">
+                          Assigned Editor: <span className="font-medium">{manuscript.assignedEditor}</span>
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground mb-4">
-                      <div>
-                        <span className="font-medium">Authors:</span>
-                        <p>{manuscript.authors}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Category:</span>
-                        <p>{manuscript.category}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Submitted:</span>
-                        <p>{new Date(manuscript.submittedDate).toLocaleDateString()}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Days in Queue:</span>
-                        <p className="text-orange-600 font-medium">{manuscript.daysInQueue}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="text-muted-foreground">
-                        Assigned Editor: <span className="font-medium">{manuscript.assignedEditor}</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <Link href={`/dashboard/editorial/review/${manuscript.id}`}>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Link href={`/dashboard/editorial/review/${manuscript.id}`}>
+                        <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                          <FileText className="h-4 w-4" />
+                          Review
+                        </Button>
+                      </Link>
                       <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                        <FileText className="h-4 w-4" />
-                        Review
+                        <Users className="h-4 w-4" />
+                        Assign Editor
                       </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                      <Users className="h-4 w-4" />
-                      Assign Editor
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="quality" className="space-y-4">
@@ -233,53 +234,54 @@ export default function EditorialDashboard() {
               <p className="text-muted-foreground">No quality issues found</p>
             </div>
           ) : (
-            qualityIssues?.map((issue) => (
-            <Card key={issue.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{issue.title}</h3>
-                      <Badge className={getSeverityColor(issue.severity)}>
-                        {issue.severity} severity
-                      </Badge>
-                      <Badge variant={issue.status === "resolved" ? "default" : "secondary"}>
-                        {issue.status}
-                      </Badge>
+            qualityIssues?.map((issue: any) => (
+              <Card key={issue.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-lg">{issue.title}</h3>
+                        <Badge className={getSeverityColor(issue.severity)}>
+                          {issue.severity} severity
+                        </Badge>
+                        <Badge variant={issue.status === "resolved" ? "default" : "secondary"}>
+                          {issue.status}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground mb-4">
+                        <div>
+                          <span className="font-medium">Issue:</span>
+                          <p>{issue.issue}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Manuscript ID:</span>
+                          <p>{issue.manuscriptId}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Assigned To:</span>
+                          <p>{issue.assignedTo}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground mb-4">
-                      <div>
-                        <span className="font-medium">Issue:</span>
-                        <p>{issue.issue}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Manuscript ID:</span>
-                        <p>{issue.manuscriptId}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Assigned To:</span>
-                        <p>{issue.assignedTo}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                      <FileText className="h-4 w-4" />
-                      View Details
-                    </Button>
-                    {issue.status === "pending" && (
+                    <div className="flex items-center gap-2 ml-4">
                       <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                        <CheckCircle className="h-4 w-4" />
-                        Mark Resolved
+                        <FileText className="h-4 w-4" />
+                        View Details
                       </Button>
-                    )}
+                      {issue.status === "pending" && (
+                        <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                          <CheckCircle className="h-4 w-4" />
+                          Mark Resolved
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="assignments">

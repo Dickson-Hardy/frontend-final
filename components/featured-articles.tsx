@@ -53,14 +53,14 @@ export function FeaturedArticles() {
           {featuredArticles.map((article) => (
             <Card
               key={article._id}
-              className="group hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20"
+              className="group hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20 h-full flex flex-col"
             >
               <CardHeader className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <Badge variant="secondary" className="text-xs">
                     {article.keywords?.[0] || "Research"}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {Math.ceil(article.abstract.split(" ").length / 200)} min read
                   </span>
                 </div>
@@ -68,13 +68,16 @@ export function FeaturedArticles() {
                   {article.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{article.abstract}</p>
+              <CardContent className="space-y-4 flex-1 flex flex-col">
+                <p className="text-muted-foreground text-sm leading-relaxed text-pretty line-clamp-4 flex-1">{article.abstract}</p>
 
-                <div className="space-y-3 pt-4 border-t border-border/50">
+                <div className="space-y-3 pt-4 border-t border-border/50 mt-auto">
                   <div className="flex items-center text-xs text-muted-foreground">
                     <User className="w-3 h-3 mr-2" />
-                    {article.authors.map((author) => `${author.firstName} ${author.lastName}`).join(", ")}
+                    {article.authors.map((author) => {
+                      const nameParts = [author.title, author.firstName, author.lastName].filter(Boolean)
+                      return nameParts.join(' ')
+                    }).join(", ")}
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-xs text-muted-foreground">

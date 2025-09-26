@@ -12,7 +12,7 @@ export default function HomePage() {
       <Navigation />
       <HeroSection />
       <FeaturedArticles />
-      <CurrentVolume />
+      {/* <CurrentVolume /> */}
       <NewsAnnouncements />
       <JournalInfo />
       <Footer />

@@ -311,7 +311,7 @@ export function ArticleNumberAssignment({ onClose }: ArticleNumberAssignmentProp
               <li>Choose an article that needs an article number assigned</li>
               <li>Enter a 3-digit number (001-999) or use the Auto button for the next available number</li>
               <li>Article numbers must be unique within each volume</li>
-              <li>This will create SEO-friendly URLs like /vol1/article001</li>
+              <li>This will create SEO-friendly URLs like /vol/1/article001</li>
             </ul>
           </AlertDescription>
         </Alert>

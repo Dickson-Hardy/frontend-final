@@ -12,20 +12,20 @@ export interface ParsedArticleUrl {
 
 /**
  * Generate SEO-friendly article URL
- * Format: /vol{volumeNumber}/article{articleNumber}
- * Example: /vol1/article001
+ * Format: /vol/{volumeNumber}/article{articleNumber}
+ * Example: /vol/1/article001
  */
 export function generateArticleUrl(volumeNumber: number, articleNumber: string): string {
-  return `/vol${volumeNumber}/article${articleNumber}`
+  return `/vol/${volumeNumber}/article${articleNumber}`
 }
 
 /**
  * Parse article URL to extract volume and article numbers
- * Input: /vol1/article001
+ * Input: /vol/1/article001
  * Output: { volumeNumber: 1, articleNumber: "001" }
  */
 export function parseArticleUrl(url: string): ParsedArticleUrl | null {
-  const match = url.match(/^\/vol(\d+)\/article(.+)$/)
+  const match = url.match(/^\/vol\/(\d+)\/article(.+)$/)
   if (!match) {
     return null
   }

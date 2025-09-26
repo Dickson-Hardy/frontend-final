@@ -99,8 +99,8 @@ export interface Article {
   volume: Volume | string  // Can be populated object or just ID
   issue?: number  // Issue number
   articleNumber?: string
-  manuscriptFile?: any
-  supplementaryFiles?: any[]
+  manuscriptFile?: UploadResult
+  supplementaryFiles?: UploadResult[]
   viewCount?: number
   downloadCount?: number
   content?: string
@@ -112,11 +112,11 @@ export interface Article {
 }
 
 export interface Author {
-  _id: string
+  title?: string
   firstName: string
   lastName: string
   email: string
-  affiliation?: string
+  affiliation: string
   orcid?: string
 }
 
@@ -128,6 +128,18 @@ export interface ArticleFile {
   size: number
   url: string
   type: "manuscript" | "supplementary" | "figure"
+}
+
+export interface UploadResult {
+  publicId: string
+  url: string
+  secureUrl: string
+  format: string
+  bytes: number
+  width?: number
+  height?: number
+  originalName?: string
+  mimeType?: string
 }
 
 export interface NewsItem {

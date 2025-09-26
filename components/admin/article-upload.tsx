@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2, Plus, Minus } from "lucide-react"
 import { useApi } from "@/hooks/use-api"
 
 interface ArticleUploadProps {
@@ -26,7 +26,7 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
     abstract: "",
     keywords: "",
     category: "",
-    authors: "",
+    authors: [{ title: "", firstName: "", lastName: "", email: "", affiliation: "" }],
     correspondingAuthor: "",
     volumeId: volumeId || "",
     researchType: "",
@@ -41,6 +41,31 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const addAuthor = () => {
+    setFormData(prev => ({
+      ...prev,
+      authors: [...prev.authors, { title: "", firstName: "", lastName: "", email: "", affiliation: "" }]
+    }))
+  }
+
+  const removeAuthor = (index: number) => {
+    if (formData.authors.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        authors: prev.authors.filter((_, i) => i !== index)
+      }))
+    }
+  }
+
+  const updateAuthor = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      authors: prev.authors.map((author, i) => 
+        i === index ? { ...author, [field]: value } : author
+      )
+    }))
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -112,13 +137,8 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
       // Ensure corresponding author email is provided
       formDataToSend.append('correspondingAuthorEmail', formData.correspondingAuthor)
       
-      // Convert authors string to array format
-      const authorsArray = formData.authors.split(',').map(author => ({
-        name: author.trim(),
-        email: formData.correspondingAuthor,
-        affiliation: ''
-      }))
-      formDataToSend.append('authors', JSON.stringify(authorsArray))
+      // Send authors array directly
+      formDataToSend.append('authors', JSON.stringify(formData.authors))
       
       if (formData.volumeId) formDataToSend.append('volume', formData.volumeId)
       if (formData.funding) formDataToSend.append('funding', formData.funding)
@@ -150,7 +170,7 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
             abstract: "",
             keywords: "",
             category: "",
-            authors: "",
+            authors: [{ title: "", firstName: "", lastName: "", email: "", affiliation: "" }],
             correspondingAuthor: "",
             volumeId: volumeId || "",
             researchType: "",
@@ -184,7 +204,8 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
     return (
       formData.title?.trim() &&
       formData.abstract?.trim() &&
-      formData.authors?.trim() &&
+      formData.authors.length > 0 &&
+      formData.authors.every(author => author.firstName.trim() && author.lastName.trim() && author.email.trim() && author.affiliation.trim()) &&
       formData.correspondingAuthor?.trim() &&
       uploadedFiles.length > 0
     )
@@ -262,29 +283,109 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="authors">Authors *</Label>
-                <Input
-                  id="authors"
-                  value={formData.authors}
-                  onChange={(e) => handleInputChange('authors', e.target.value)}
-                  placeholder="Enter author names (comma separated)"
-                  required
-                />
+            {/* Authors Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-medium">Authors *</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addAuthor}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Author
+                </Button>
               </div>
+              
+              {formData.authors.map((author, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Author {index + 1}</h4>
+                    {formData.authors.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeAuthor(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Minus className="h-4 w-4" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`author-title-${index}`}>Title (Optional)</Label>
+                      <Input
+                        id={`author-title-${index}`}
+                        value={author.title}
+                        onChange={(e) => updateAuthor(index, 'title', e.target.value)}
+                        placeholder="Dr., Prof., etc."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`author-firstname-${index}`}>First Name *</Label>
+                      <Input
+                        id={`author-firstname-${index}`}
+                        value={author.firstName}
+                        onChange={(e) => updateAuthor(index, 'firstName', e.target.value)}
+                        placeholder="Enter first name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`author-lastname-${index}`}>Last Name *</Label>
+                      <Input
+                        id={`author-lastname-${index}`}
+                        value={author.lastName}
+                        onChange={(e) => updateAuthor(index, 'lastName', e.target.value)}
+                        placeholder="Enter last name"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor={`author-email-${index}`}>Email *</Label>
+                      <Input
+                        id={`author-email-${index}`}
+                        type="email"
+                        value={author.email}
+                        onChange={(e) => updateAuthor(index, 'email', e.target.value)}
+                        placeholder="author@university.edu"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`author-affiliation-${index}`}>Affiliation *</Label>
+                      <Input
+                        id={`author-affiliation-${index}`}
+                        value={author.affiliation}
+                        onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)}
+                        placeholder="University/Institution"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-              <div>
-                <Label htmlFor="correspondingAuthor">Corresponding Author Email *</Label>
-                <Input
-                  id="correspondingAuthor"
-                  value={formData.correspondingAuthor}
-                  onChange={(e) => handleInputChange('correspondingAuthor', e.target.value)}
-                  placeholder="Enter corresponding author email"
-                  type="email"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="correspondingAuthor">Corresponding Author Email *</Label>
+              <Input
+                id="correspondingAuthor"
+                value={formData.correspondingAuthor}
+                onChange={(e) => handleInputChange('correspondingAuthor', e.target.value)}
+                placeholder="Enter corresponding author email"
+                type="email"
+                required
+              />
             </div>
 
             <div>

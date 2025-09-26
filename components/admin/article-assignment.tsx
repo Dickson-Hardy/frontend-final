@@ -40,6 +40,8 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
   // Debug logging
   console.log('📝 Available articles:', availableArticles)
   console.log('📝 Assigned articles:', assignedArticles)
+  console.log('📝 Assigned articles length:', assignedArticles.length)
+  console.log('📝 First assigned article:', assignedArticles[0])
   console.log('📝 Volume data:', volume)
 
   const handleArticleSelect = (articleId: string, selected: boolean) => {
@@ -264,7 +266,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            <span>{Array.isArray(article.authors) ? article.authors.map((a: any) => `${a.firstName} ${a.lastName}`).join(', ') : 'Unknown Author'}</span>
+                            <span>{Array.isArray(article.authors) && article.authors.length > 0 ? article.authors.map((author: any) => [author.title, author.firstName, author.lastName].filter(Boolean).join(' ')).join(', ') : 'Unknown Author'}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
@@ -325,7 +327,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                     <div key={article._id || article.id} className="flex items-start justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold text-lg">{article.title}</h3>
+                          <h3 className="font-semibold text-lg">{article.title || 'Untitled Article'}</h3>
                           <div className="flex items-center gap-2">
                             <Badge className={getCategoryColor(article.category)}>
                               {article.category}
@@ -338,14 +340,14 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            <span>{Array.isArray(article.authors) ? article.authors.map((a: any) => `${a.firstName} ${a.lastName}`).join(', ') : 'Unknown Author'}</span>
+                            <span>{Array.isArray(article.authors) && article.authors.length > 0 ? article.authors.map((author: any) => [author.title, author.firstName, author.lastName].filter(Boolean).join(' ')).join(', ') : 'Unknown Author'}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             <span>Submitted: {article.submissionDate ? new Date(article.submissionDate).toLocaleDateString() : 'N/A'}</span>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{article.abstract}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{article.abstract || 'No abstract available'}</p>
                       </div>
                       <div className="ml-4">
                         <Button

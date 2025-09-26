@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, FileText, Download, Eye, Users, Building, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useApi } from "@/hooks/use-api"
+import { Volume } from "@/lib/api"
 
 export default function VolumesPage() {
   const { data: volumes, isLoading, error } = useApi('/volumes')
@@ -48,15 +49,15 @@ export default function VolumesPage() {
             <p className="text-muted-foreground">No volumes found</p>
           </div>
         ) : (
-          volumes?.map((volume) => (
-          <Card key={volume.id}>
-            <CardContent className="pt-6">
+          volumes?.map((volume: Volume) => (
+            <Card key={volume._id}>
+              <CardContent className="pt-6">
               <div className="space-y-6">
                 {/* Volume Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-2xl font-semibold text-foreground">{volume.number}</h2>
+                      <h2 className="text-2xl font-semibold text-foreground">Volume {volume.volume}</h2>
                       <Badge className={getStatusColor(volume.status)}>
                         {volume.status}
                       </Badge>
@@ -68,11 +69,11 @@ export default function VolumesPage() {
                     <div className="flex items-center gap-6 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>Published: {new Date(volume.publishedDate).toLocaleDateString()}</span>
+                        <span>Published: {volume.publishDate ? new Date(volume.publishDate).toLocaleDateString() : 'Not published'}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <FileText className="h-4 w-4" />
-                        <span>{volume.articles} articles</span>
+                        <span>{volume.articles?.length || 0} articles</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
@@ -101,14 +102,14 @@ export default function VolumesPage() {
                 <div>
                   <h4 className="font-medium mb-3">Articles in this Volume</h4>
                   <div className="space-y-2">
-                    {volume.articles.map((article) => (
-                      <div key={article.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    {volume.articles?.map((articleId: string) => (
+                      <div key={articleId} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                         <div className="flex-1">
-                          <h5 className="font-medium text-sm">{article.title}</h5>
-                          <p className="text-xs text-muted-foreground">{article.authors}</p>
+                          <h5 className="font-medium text-sm">Article {articleId}</h5>
+                          <p className="text-xs text-muted-foreground">Article ID: {articleId}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Pages {article.pages}</span>
+                          <span className="text-xs text-muted-foreground">Article ID: {articleId}</span>
                           <Button variant="outline" size="sm" className="gap-1">
                             <Eye className="h-3 w-3" />
                             View
@@ -119,9 +120,10 @@ export default function VolumesPage() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Archive Notice */}

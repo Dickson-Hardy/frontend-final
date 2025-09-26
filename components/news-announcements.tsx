@@ -27,7 +27,7 @@ export function NewsAnnouncements() {
       <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Unable to load news items at this time.</p>
+            <p className="text-red-600">Unable to load news items at this time.</p>
           </div>
         </div>
       </section>

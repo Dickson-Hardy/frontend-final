@@ -52,7 +52,7 @@ export function Navigation() {
               Search
             </Button>
             <Link href="/auth/login">
-              <Button variant="outline" size="sm" className="hidden sm:flex bg-transparent">
+              <Button variant="outline" size="sm" className="hidden sm:flex">
                 Login
               </Button>
             </Link>

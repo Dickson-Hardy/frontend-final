@@ -192,7 +192,7 @@ export default function ArticleDetailPage() {
               {finalArticle.authors?.map((author: any, index: number) => (
                 <div key={index} className="flex items-center gap-2 text-muted-foreground">
                   <User className="w-4 h-4" />
-                  <span>{author.firstName} {author.lastName}</span>
+                  <span>{[author.title, author.firstName, author.lastName].filter(Boolean).join(' ')}</span>
                   {author.affiliation && (
                     <>
                       <Building className="w-4 h-4" />

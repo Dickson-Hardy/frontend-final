@@ -28,7 +28,7 @@ export function CurrentVolume() {
       <section className="py-24 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Unable to load volume information at this time.</p>
+            <p className="text-red-600">Unable to load volume information at this time.</p>
           </div>
         </div>
       </section>
@@ -78,7 +78,7 @@ export function CurrentVolume() {
               <div className="relative">
                 <img
                   src={currentVolume.coverImage || "/placeholder.svg?height=400&width=300&query=medical journal cover"}
-                  alt={`Volume ${currentVolume.number} Cover`}
+                  alt={`Volume ${currentVolume.volume} Cover`}
                   className="w-full max-w-xs rounded-lg shadow-xl border border-border"
                 />
                 <Badge className="absolute -top-2 -right-2 bg-primary">Featured</Badge>
@@ -90,7 +90,7 @@ export function CurrentVolume() {
               <CardHeader className="p-0 mb-6">
                 <div className="flex items-center gap-4 mb-4">
                   <Badge variant="outline" className="text-sm">
-                    Volume {currentVolume.number}
+                    Volume {currentVolume.volume}
                   </Badge>
                   <Badge variant="secondary" className="text-sm">
                     {currentVolume.year}
@@ -110,7 +110,7 @@ export function CurrentVolume() {
                   </div>
                   <div className="text-center p-4 bg-background rounded-lg border border-border/50">
                     <Calendar className="w-6 h-6 text-primary mx-auto mb-2" />
-                    <div className="text-lg font-bold">{currentVolume.publishedDate ? format(new Date(currentVolume.publishedDate), "MMM yyyy") : 'TBD'}</div>
+                    <div className="text-lg font-bold">{currentVolume.publishDate ? format(new Date(currentVolume.publishDate), "MMM yyyy") : 'TBD'}</div>
                     <div className="text-xs text-muted-foreground">Published</div>
                   </div>
                   <div className="text-center p-4 bg-background rounded-lg border border-border/50">
@@ -121,7 +121,7 @@ export function CurrentVolume() {
                   <div className="text-center p-4 bg-background rounded-lg border border-border/50">
                     <div className="w-6 h-6 text-primary mx-auto mb-2 text-sm font-bold">DOI</div>
                     <div className="text-xs font-mono truncate">
-                      10.1234/amhsj.{currentVolume.year}.{currentVolume.number}
+                      10.1234/amhsj.{currentVolume.year}.{currentVolume.volume}
                     </div>
                     <div className="text-xs text-muted-foreground">Identifier</div>
                   </div>
@@ -161,14 +161,14 @@ export function CurrentVolume() {
                   <div className="aspect-[3/4] bg-gradient-to-br from-secondary/20 to-accent/10 p-4 flex items-center justify-center">
                     <img
                       src={volume.coverImage || "/placeholder.svg?height=400&width=300&query=medical journal cover"}
-                      alt={`Volume ${volume.number} Cover`}
+                      alt={`Volume ${volume.volume} Cover`}
                       className="w-full h-full object-cover rounded border border-border/50 group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                   <CardHeader className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="text-xs">
-                        Vol {volume.number}
+                        Vol {volume.volume}
                       </Badge>
                       <Badge variant="secondary" className="text-xs">
                         {volume.year}
@@ -186,14 +186,14 @@ export function CurrentVolume() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {volume.publishedDate ? format(new Date(volume.publishedDate), "MMM yyyy") : 'TBD'}
+                        {volume.publishDate ? format(new Date(volume.publishDate), "MMM yyyy") : 'TBD'}
                       </div>
                     </div>
                     <div className="text-xs font-mono text-muted-foreground truncate">
-                      DOI: 10.1234/amhsj.{volume.year}.{volume.number}
+                      DOI: 10.1234/amhsj.{volume.year}.{volume.volume}
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 group/btn bg-transparent">
+                      <Button variant="outline" size="sm" className="flex-1 group/btn">
                         <Eye className="w-3 h-3 mr-1" />
                         View
                         <ArrowRight className="w-3 h-3 ml-1 group-hover/btn:translate-x-1 transition-transform" />

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Save, AlertCircle, CheckCircle, FileText, Calendar, User } from "lucide-react"
+import { format } from "date-fns"
 import { useApi } from "@/hooks/use-api"
 import { Article, articleService } from "@/lib/api"
 import { toast } from "sonner"
@@ -210,11 +211,10 @@ export function ArticleNumberAssignment({ onClose }: ArticleNumberAssignmentProp
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     <span>
-                      {currentArticle.submissionDate ? 
-                        new Date(currentArticle.submissionDate).toLocaleDateString() : 
-                        'No date'
-                      }
-                    </span>
+                       {currentArticle.submissionDate ?
+                         format(new Date(currentArticle.submissionDate), 'MMMM d, yyyy') :
+                         'N/A'}
+                      </span>
                   </div>
                 </div>
 

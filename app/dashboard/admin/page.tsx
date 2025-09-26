@@ -278,11 +278,11 @@ function AdminDashboardInner() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                    <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                    <Button variant="outline" size="sm" className="gap-2">
                       <Users className="h-4 w-4" />
                       Edit User
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                    <Button variant="outline" size="sm" className="gap-2">
                       <Shield className="h-4 w-4" />
                       Permissions
                     </Button>

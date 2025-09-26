@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Plus, Minus, FileText, User, Calendar, Eye, Loader2 } from "lucide-react"
+import { format } from "date-fns"
 import { useApi, useAssignArticles } from "@/hooks/use-api"
 import { volumeService } from "@/lib/api"
 
@@ -270,7 +271,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>{article.submissionDate ? new Date(article.submissionDate).toLocaleDateString() : 'N/A'}</span>
+                            <span>{article.submissionDate ? format(new Date(article.submissionDate), 'MMMM d, yyyy') : 'N/A'}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Eye className="h-4 w-4" />
@@ -344,7 +345,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>Submitted: {article.submissionDate ? new Date(article.submissionDate).toLocaleDateString() : 'N/A'}</span>
+                            <span>Submitted: {article.submissionDate ? format(new Date(article.submissionDate), 'MMMM d, yyyy') : 'N/A'}</span>
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">{article.abstract || 'No abstract available'}</p>

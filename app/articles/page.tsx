@@ -24,9 +24,10 @@ export default function ArticlesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedVolume, setSelectedVolume] = useState("all")
+  const [sortBy, setSortBy] = useState("date-desc")
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { data: articlesData, isLoading, error } = useApi<PaginatedArticlesResponse>(`/articles?page=${currentPage}&limit=10&search=${searchTerm}&category=${selectedCategory}&volume=${selectedVolume}`)
+  const { data: articlesData, isLoading, error } = useApi<PaginatedArticlesResponse>(`/articles/published?page=${currentPage}&limit=10&search=${searchTerm}&category=${selectedCategory !== 'all' ? selectedCategory : ''}`)
   const { data: categories } = useApi<string[]>('/articles/categories')
   const { data: volumes } = useApi<string[]>('/volumes/titles')
 
@@ -71,15 +72,18 @@ export default function ArticlesPage() {
                 <Input
                   placeholder="Search articles by title, author, or keywords..."
                   className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
             <div className="flex gap-4">
-              <Select>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categoriesList.map((category) => (
                     <SelectItem key={category} value={category.toLowerCase().replace(" ", "-")}>
                       {category}
@@ -87,16 +91,29 @@ export default function ArticlesPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select>
+              <Select value={selectedVolume} onValueChange={setSelectedVolume}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="All Volumes" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Volumes</SelectItem>
                   {volumesList.map((volume) => (
                     <SelectItem key={volume} value={volume.toLowerCase().replace(" ", "-")}>
                       {volume}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Sort by Date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date-desc">Newest First</SelectItem>
+                  <SelectItem value="date-asc">Oldest First</SelectItem>
+                  <SelectItem value="title-asc">Title A-Z</SelectItem>
+                  <SelectItem value="title-desc">Title Z-A</SelectItem>
+                  <SelectItem value="views-desc">Most Viewed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -137,7 +154,7 @@ export default function ArticlesPage() {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center gap-1">
                           <User className="h-4 w-4" />
-                          <span>{article.authors?.map((author: any) => `${author.firstName} ${author.lastName}`).join(', ') || 'Unknown Author'}</span>
+                          <span>{article.authors?.map((author: any) => [author.title, author.firstName, author.lastName].filter(Boolean).join(' ')).join(', ') || 'Unknown Author'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />

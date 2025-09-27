@@ -37,6 +37,9 @@ export function Navigation() {
             <Link href="/editorial-board" className="text-muted-foreground hover:text-primary transition-colors">
               Editorial Board
             </Link>
+            <Link href="/masthead" className="text-muted-foreground hover:text-primary transition-colors">
+              Masthead
+            </Link>
             <Link href="/guidelines" className="text-muted-foreground hover:text-primary transition-colors">
               Guidelines
             </Link>
@@ -82,6 +85,9 @@ export function Navigation() {
               </Link>
               <Link href="/editorial-board" className="block px-3 py-2 text-muted-foreground hover:text-primary">
                 Editorial Board
+              </Link>
+              <Link href="/masthead" className="block px-3 py-2 text-muted-foreground hover:text-primary">
+                Masthead
               </Link>
               <Link href="/guidelines" className="block px-3 py-2 text-muted-foreground hover:text-primary">
                 Guidelines

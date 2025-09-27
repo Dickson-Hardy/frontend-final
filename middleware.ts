@@ -17,6 +17,7 @@ export function middleware(request: NextRequest) {
     "/articles",
     "/vol",
     "/editorial-board",
+    "/masthead",
     "/guidelines",
   ]
 

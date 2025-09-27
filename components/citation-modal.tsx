@@ -40,10 +40,11 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
       volume: typeof apiArticle.volume === 'object' ? {
         number: apiArticle.volume.volume?.toString(),
         volume: apiArticle.volume.volume?.toString()
-      } : undefined,
+      } : { volume: apiArticle.volume },
       issue: apiArticle.issue?.toString(),
       pages: apiArticle.pages,
-      url: apiArticle.doi ? `https://doi.org/${apiArticle.doi}` : undefined
+      url: apiArticle.doi ? `https://doi.org/${apiArticle.doi}` : undefined,
+      articleNumber: apiArticle.articleNumber
     };
   };
 

@@ -312,18 +312,20 @@ export function formatAuthorsCustom(authors: Author[]): string {
   return `${firstAuthor.lastName} ${firstAuthor.firstName.charAt(0)}${firstAuthor.firstName.charAt(1) || ''}, et al.`;
 }
 
-export function generateCustomCitation(article: Article): string {
+export function generateCustomCitation(article: any): string {
   const authors = formatAuthorsCustom(article.authors);
   const year = article.publishedDate ? new Date(article.publishedDate).getFullYear() : new Date().getFullYear();
   const title = article.title;
   const journal = "Advances in Medicine and Health Sciences Journal";
   
-  // Handle volume - it can be a Volume object or string
-  let volumeNumber: string;
-  if (typeof article.volume === 'string') {
-    volumeNumber = article.volume;
-  } else {
-    volumeNumber = article.volume.volume.toString();
+  // Handle volume - it can be a Volume object or string, and might be undefined
+  let volumeNumber: string = "1"; // Default fallback
+  if (article.volume) {
+    if (typeof article.volume === 'string') {
+      volumeNumber = article.volume;
+    } else if (article.volume.volume) {
+      volumeNumber = article.volume.volume.toString();
+    }
   }
   
   // Format article number with leading zeros if needed

@@ -8,6 +8,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Enable credentials for CORS requests
 })
 
 // Add auth token to requests

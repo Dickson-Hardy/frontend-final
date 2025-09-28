@@ -11,7 +11,7 @@ import Link from "next/link"
 import { useApi } from "@/hooks/use-api"
 import { Article } from "@/lib/api"
 import { format } from "date-fns"
-import { parseArticleUrl } from "@/lib/url-utils"
+import { parseArticleUrl, getArticleUrl } from "@/lib/url-utils"
 import { api } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
 import JSZip from "jszip"
@@ -292,7 +292,7 @@ ${articleContent.content}
                         
                         <CardTitle className="text-xl mb-2 leading-tight">
                           <Link 
-                            href={`/vol/${volumeNumber}/article${article.articleNumber}`}
+                            href={getArticleUrl(article)}
                             className="hover:text-primary transition-colors"
                           >
                             {article.title}
@@ -344,7 +344,7 @@ ${articleContent.content}
                       </div>
                       
                       <div className="flex gap-2">
-                        <Link href={`/vol/${volumeNumber}/article${article.articleNumber}`}>
+                        <Link href={getArticleUrl(article)}>
                           <Button variant="outline" size="sm">
                             <Eye className="w-3 h-3 mr-1" />
                             Read

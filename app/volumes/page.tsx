@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, FileText, Download, Eye, Users, Building, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useApi } from "@/hooks/use-api"
-import { Volume } from "@/lib/api"
+import { Volume, Article } from "@/lib/api"
 
 export default function VolumesPage() {
   const { data: volumes, isLoading, error } = useApi('/volumes')
@@ -102,14 +102,23 @@ export default function VolumesPage() {
                 <div>
                   <h4 className="font-medium mb-3">Articles in this Volume</h4>
                   <div className="space-y-2">
-                    {volume.articles?.map((articleId: string) => (
-                      <div key={articleId} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    {volume.articles?.map((article: Article | string) => (
+                      <div key={typeof article === 'object' ? article._id : article} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                         <div className="flex-1">
-                          <h5 className="font-medium text-sm">Article {articleId}</h5>
-                          <p className="text-xs text-muted-foreground">Article ID: {articleId}</p>
+                          <h5 className="font-medium text-sm">
+                            {typeof article === 'object' && article.title ? article.title : `Article ${article}`}
+                          </h5>
+                          <p className="text-xs text-muted-foreground">
+                            {typeof article === 'object' && article.authors?.length > 0 
+                               ? `By ${article.authors.map(author => `${author.firstName} ${author.lastName}`).join(', ')}`
+                               : `Article ID: ${typeof article === 'object' ? article._id : article}`
+                             }
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Article ID: {articleId}</span>
+                          {typeof article === 'object' && article.articleNumber && (
+                            <span className="text-xs text-muted-foreground">Article {article.articleNumber}</span>
+                          )}
                           <Button variant="outline" size="sm" className="gap-1">
                             <Eye className="h-3 w-3" />
                             View

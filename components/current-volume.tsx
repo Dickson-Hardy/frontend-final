@@ -6,10 +6,88 @@ import { Button } from "@/components/ui/button"
 import { Book, Calendar, FileText, ArrowRight, Download, Eye, Loader2 } from "lucide-react"
 import { useCurrentVolume, useRecentVolumes } from "@/hooks/use-api"
 import { format } from "date-fns"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { api } from "@/lib/api"
+import { toast } from "@/hooks/use-toast"
 
 export function CurrentVolume() {
   const { data: currentVolume, isLoading: currentLoading, error: currentError } = useCurrentVolume()
   const { data: recentVolumes, isLoading: recentLoading, error: recentError } = useRecentVolumes(3)
+  const router = useRouter()
+  const [downloadingVolume, setDownloadingVolume] = useState<string | null>(null)
+
+  // Handle navigation to volume articles
+  const handleViewArticles = (volumeId: string, volumeNumber: number) => {
+    router.push(`/vol/${volumeNumber}`)
+  }
+
+  // Handle volume download
+  const handleDownloadVolume = async (volumeId: string, volumeTitle: string) => {
+    try {
+      setDownloadingVolume(volumeId)
+      
+      // Increment download count
+      await api.post(`/volumes/${volumeId}/download`)
+      
+      // Get all articles in the volume
+      const response = await api.get(`/volumes/${volumeId}/articles`)
+      const articles = response.data
+      
+      if (!articles || articles.length === 0) {
+        toast({
+          title: "No articles available",
+          description: "This volume doesn't contain any articles to download.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Create a downloadable content with all articles
+      const volumeContent = {
+        title: volumeTitle,
+        articles: articles.map((article: any) => ({
+          title: article.title,
+          authors: article.authors?.map((author: any) => 
+            `${author.firstName} ${author.lastName}`
+          ).join(", ") || "Unknown Authors",
+          abstract: article.abstract,
+          content: article.content || "Content not available",
+          keywords: article.keywords?.join(", ") || "",
+          doi: article.doi || "",
+          pages: article.pages || ""
+        }))
+      }
+
+      // Create and download a JSON file with all articles
+      const dataStr = JSON.stringify(volumeContent, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${volumeTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_articles.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast({
+        title: "Download started",
+        description: `All articles from "${volumeTitle}" are being downloaded.`
+      })
+
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download failed",
+        description: "Unable to download the volume. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDownloadingVolume(null)
+    }
+  }
 
   if (currentLoading || recentLoading) {
     return (
@@ -129,14 +207,27 @@ export function CurrentVolume() {
 
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" className="group">
+                  <Button 
+                    size="lg" 
+                    className="group"
+                    onClick={() => handleViewArticles(currentVolume._id, currentVolume.volume)}
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     View Articles
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
-                  <Button variant="outline" size="lg">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download PDF
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => handleDownloadVolume(currentVolume._id, currentVolume.title)}
+                    disabled={downloadingVolume === currentVolume._id}
+                  >
+                    {downloadingVolume === currentVolume._id ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
+                    {downloadingVolume === currentVolume._id ? "Downloading..." : "Download All Articles"}
                   </Button>
                 </div>
               </CardContent>
@@ -193,13 +284,27 @@ export function CurrentVolume() {
                       DOI: 10.1234/amhsj.{volume.year}.{volume.volume}
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 group/btn">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 group/btn"
+                        onClick={() => handleViewArticles(volume._id, volume.volume)}
+                      >
                         <Eye className="w-3 h-3 mr-1" />
                         View
                         <ArrowRight className="w-3 h-3 ml-1 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <Download className="w-3 h-3" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDownloadVolume(volume._id, volume.title)}
+                        disabled={downloadingVolume === volume._id}
+                      >
+                        {downloadingVolume === volume._id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Download className="w-3 h-3" />
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -208,7 +313,11 @@ export function CurrentVolume() {
             </div>
 
             <div className="text-center">
-              <Button variant="outline" size="lg">
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => router.push('/volumes')}
+              >
                 Browse All Volumes
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

@@ -16,7 +16,7 @@ import {
   Clock, 
   Users, 
   FileText, 
-  Review, 
+  FileCheck, 
   Settings, 
   HelpCircle,
   Send,
@@ -254,7 +254,7 @@ export default function ContactPage() {
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Review className="w-5 h-5 text-primary" />
+                  <FileCheck className="w-5 h-5 text-primary" />
                   Peer Review
                 </CardTitle>
               </CardHeader>

@@ -9,7 +9,7 @@ export default function HomePage() {
     <>
       <HeroSection />
       <FeaturedArticles />
-      {/* <CurrentVolume /> */}
+       <CurrentVolume />
       <NewsAnnouncements />
       <JournalInfo />
     </>

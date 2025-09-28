@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -303,9 +304,13 @@ export function Sidebar() {
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="h-4 w-4 text-sidebar-primary-foreground" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="AMHSJ Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain bg-sidebar-primary rounded-lg p-1"
+            />
             <div>
               <h2 className="text-sm font-semibold text-sidebar-foreground">AMHSJ</h2>
               <p className="text-xs text-sidebar-foreground/60">Dashboard</p>

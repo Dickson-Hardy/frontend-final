@@ -26,6 +26,7 @@ import {
   Loader2
 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { authService } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
@@ -225,9 +226,13 @@ export default function RegistrationPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="AMHSJ Logo"
+                width={64}
+                height={64}
+                className="w-16 h-16 object-contain"
+              />
             </div>
             <h1 className="text-3xl font-bold text-blue-900 mb-2">AMHSJ</h1>
           </Link>

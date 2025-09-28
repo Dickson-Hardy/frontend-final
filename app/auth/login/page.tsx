@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, EyeOff, Mail, Lock, User, Building, AlertCircle, Shield } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { login, getDashboardRoute } from "@/lib/auth"
 
@@ -51,10 +52,19 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
-            <h1 className="text-2xl font-bold text-blue-900 mb-2">AMHSJ</h1>
+          <Link href="/" className="inline-flex flex-col items-center space-y-3">
+            <Image
+              src="/logo.png"
+              alt="AMHSJ Logo"
+              width={64}
+              height={64}
+              className="w-16 h-16 object-contain"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900 mb-1">AMHSJ</h1>
+              <p className="text-gray-600 text-sm">Advances in Medicine & Health Sciences Journal</p>
+            </div>
           </Link>
-          <p className="text-gray-600">Advances in Medicine & Health Sciences Journal</p>
         </div>
 
         <Card className="shadow-lg">

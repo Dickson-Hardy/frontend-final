@@ -21,11 +21,27 @@ export const metadata: Metadata = {
     "peer-reviewed",
     "AMHSJ"
   ],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" }
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ]
+  },
   openGraph: {
     title: "AMHSJ - Advances in Medical & Health Sciences Journal",
     description: "Peer-reviewed medical journal advancing healthcare through research, innovation, and global collaboration.",
     url: "https://amhsj.org",
     images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 1200,
+        alt: "AMHSJ Logo"
+      },
       {
         url: "/medical-journal-cover-ai-healthcare.jpg",
         width: 1200,
@@ -39,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AMHSJ - Advances in Medical & Health Sciences Journal",
     description: "Peer-reviewed medical journal advancing healthcare through research, innovation, and global collaboration.",
-    images: ["/medical-journal-cover-ai-healthcare.jpg"]
+    images: ["/logo.png", "/medical-journal-cover-ai-healthcare.jpg"]
   },
   alternates: {
     canonical: "https://amhsj.org"

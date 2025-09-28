@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function ResetPasswordPage({ params }: { params: { token: string } }) {
   const [formData, setFormData] = useState({
@@ -90,6 +91,15 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
+          <Link href="/" className="inline-block mb-6">
+            <Image
+              src="/logo.png"
+              alt="AMHSJ Logo"
+              width={64}
+              height={64}
+              className="w-16 h-16 object-contain mx-auto"
+            />
+          </Link>
           <h1 className="text-3xl font-bold text-foreground">Reset Password</h1>
           <p className="text-muted-foreground mt-2">
             Enter your new password below

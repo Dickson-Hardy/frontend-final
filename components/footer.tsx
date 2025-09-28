@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Mail, Phone, MapPin, Twitter, Linkedin, Facebook } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -11,9 +12,13 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary-foreground rounded-full flex items-center justify-center">
-                <span className="text-primary font-bold text-sm">A</span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="AMHSJ Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain bg-primary-foreground rounded-full p-1"
+              />
               <div>
                 <h3 className="text-lg font-semibold">AMHSJ</h3>
                 <p className="text-xs text-primary-foreground/80">Medical Research Journal</p>

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X, Search } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -13,15 +14,19 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">A</span>
-            </div>
+          <Link href="/" className="flex items-center space-x-3">
+            <Image
+              src="/logo.png"
+              alt="AMHSJ Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+            />
             <div className="hidden sm:block">
               <h1 className="text-lg font-semibold text-foreground">AMHSJ</h1>
               <p className="text-xs text-muted-foreground -mt-1">Medical Research Journal</p>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">

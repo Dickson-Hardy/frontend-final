@@ -1,5 +1,5 @@
 // Simple test script to verify API connection
-const API_BASE_URL = "https://backend-final-uso0.onrender.com"
+const API_BASE_URL = 'https://octopus-app-3jhrw.ondigitalocean.app'
 
 async function testAPI() {
   console.log('🧪 Testing API connection...')

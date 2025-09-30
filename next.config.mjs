@@ -53,7 +53,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://backend-final-uso0.onrender.com " + (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'),
+              "connect-src 'self' https://octopus-app-3jhrw.ondigitalocean.app " + (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'),
               "frame-ancestors 'none'",
             ].join('; '),
           },

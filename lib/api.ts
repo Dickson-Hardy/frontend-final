@@ -110,6 +110,8 @@ export interface Article {
   acknowledgments?: string
   conflictOfInterest?: string
   featured?: boolean
+  type?: string
+  categories?: string[]
 }
 
 export interface Author {
@@ -246,4 +248,32 @@ export const authService = {
 
 export const statisticsService = {
   getJournalStatistics: () => api.get<JournalStatistics>("/statistics/journal"),
+}
+
+export const adminArticleService = {
+  getAll: () => api.get<Article[]>("/admin/articles"),
+  getById: (id: string) => api.get<Article>(`/admin/articles/${id}`),
+  update: (id: string, data: FormData | Partial<Article>) => {
+    const config: AxiosRequestConfig = data instanceof FormData 
+      ? { headers: { "Content-Type": "multipart/form-data" } }
+      : {}
+    return api.patch<Article>(`/admin/articles/${id}`, data, config)
+  },
+  replaceManuscript: (id: string, file: File) => {
+    const formData = new FormData()
+    formData.append("manuscript", file)
+    return api.post<Article>(`/admin/articles/${id}/manuscript`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  },
+  addSupplementaryFiles: (id: string, files: File[]) => {
+    const formData = new FormData()
+    files.forEach(file => formData.append("supplementary", file))
+    return api.post<Article>(`/admin/articles/${id}/supplementary`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  },
+  removeSupplementaryFile: (id: string, fileIndex: number) => 
+    api.delete(`/admin/articles/${id}/supplementary/${fileIndex}`),
+  delete: (id: string) => api.delete(`/admin/articles/${id}`),
 }

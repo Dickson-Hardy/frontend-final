@@ -190,6 +190,42 @@ function AdminDashboardInner() {
         </Card>
       </div>
 
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common administrative tasks</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Link href="/dashboard/admin/articles">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <FileText className="h-6 w-6" />
+                <span>Manage Articles</span>
+              </Button>
+            </Link>
+            <Link href="/dashboard/admin/volumes">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <Database className="h-6 w-6" />
+                <span>Manage Volumes</span>
+              </Button>
+            </Link>
+            <Link href="/dashboard/admin/users">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <Users className="h-6 w-6" />
+                <span>Manage Users</span>
+              </Button>
+            </Link>
+            <Link href="/dashboard/admin/settings">
+              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
+                <Settings className="h-6 w-6" />
+                <span>System Settings</span>
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Content */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>

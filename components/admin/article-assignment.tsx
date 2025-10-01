@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Search, Plus, Minus, FileText, User, Calendar, Eye, Loader2 } from "lucide-react"
+import { Search, Plus, Minus, FileText, User, Calendar, Eye, Loader2, Edit } from "lucide-react"
 import { format } from "date-fns"
 import { useApi, useAssignArticles } from "@/hooks/use-api"
 import { volumeService } from "@/lib/api"
+import { ArticleEditDialog } from "@/components/admin/article-edit-dialog"
 
 interface ArticleAssignmentProps {
   volumeId: string
@@ -24,6 +25,7 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedArticles, setSelectedArticles] = useState<string[]>([])
+  const [editingArticleId, setEditingArticleId] = useState<string | null>(null)
 
   const { data: volumeData, isLoading: volumeLoading } = useApi(`/volumes/${volumeId}`)
   const { data: availableArticlesData, isLoading: articlesLoading } = useApi(`/articles/available-for-volume?volumeId=${volumeId}&search=${searchTerm}&category=${selectedCategory}&status=${selectedStatus}`)
@@ -350,7 +352,16 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">{article.abstract || 'No abstract available'}</p>
                       </div>
-                      <div className="ml-4">
+                      <div className="ml-4 flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingArticleId(article._id || article.id)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -369,6 +380,16 @@ export function ArticleAssignment({ volumeId, onAssignmentComplete }: ArticleAss
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Article Edit Dialog */}
+      {editingArticleId && (
+        <ArticleEditDialog
+          articleId={editingArticleId}
+          open={!!editingArticleId}
+          onOpenChange={(open) => !open && setEditingArticleId(null)}
+          onSuccess={onAssignmentComplete}
+        />
+      )}
     </div>
   )
 }

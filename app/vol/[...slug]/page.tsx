@@ -15,6 +15,12 @@ import { parseArticleUrl, getArticleUrl } from "@/lib/url-utils"
 import { api } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
 import JSZip from "jszip"
+import { CitationModal } from "@/components/citation-modal"
+import { ArticleSidebar } from "@/components/article/article-sidebar"
+import { AuthorCards } from "@/components/article/author-cards"
+import { PDFViewer } from "@/components/article/pdf-viewer"
+import { RelatedArticles } from "@/components/article/related-articles"
+import { ArticleMetaTags, VolumeMetaTags } from "@/components/seo/article-meta-tags"
 
 export default function VolumeOrArticlePage() {
   const params = useParams()
@@ -199,6 +205,11 @@ ${articleContent.content}
 
   return (
     <div className="min-h-screen bg-background">
+      {/* SEO: Structured Data */}
+      {volume && articles && (
+        <VolumeMetaTags volume={volume} articles={articles} />
+      )}
+      
       {/* Navigation */}
       <div className="border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -378,19 +389,31 @@ ${articleContent.content}
   )
 }
 
-// Individual article component (existing functionality)
+// Individual article component (REDESIGNED with professional layout)
 function ArticleDetailPage({ parsedUrl }: { parsedUrl: { volumeNumber: number; articleNumber: string } }) {
   const { volumeNumber, articleNumber } = parsedUrl
+  const [showCitationModal, setShowCitationModal] = useState(false)
   
   // Find article by volume and article number using the new API endpoint
   const { data: finalArticle, isLoading } = useApi<Article>(
     `/articles/volume/${volumeNumber}/article/${articleNumber}`
   )
 
+  // Fetch other articles from the same volume for related articles
+  const volumeId = typeof finalArticle?.volume === 'object' ? finalArticle.volume._id : null
+  const { data: volumeArticles } = useApi<Article[]>(
+    volumeId ? `/volumes/${volumeId}/articles` : ''
+  )
+
+  // Filter out current article and get up to 3 related articles
+  const relatedArticles = volumeArticles
+    ?.filter(article => article._id !== finalArticle?._id)
+    .slice(0, 3) || []
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
@@ -402,7 +425,7 @@ function ArticleDetailPage({ parsedUrl }: { parsedUrl: { volumeNumber: number; a
   if (!finalArticle) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-foreground mb-4">Article Not Found</h1>
             <p className="text-muted-foreground mb-6">
@@ -420,174 +443,200 @@ function ArticleDetailPage({ parsedUrl }: { parsedUrl: { volumeNumber: number; a
     )
   }
 
-  const handleDownload = () => {
-    if (finalArticle.manuscriptFile?.url) {
-      window.open(finalArticle.manuscriptFile.url, '_blank')
+  const handleDownload = async () => {
+    if (finalArticle.manuscriptFile?.secureUrl || finalArticle.manuscriptFile?.url) {
+      const downloadUrl = finalArticle.manuscriptFile.secureUrl || finalArticle.manuscriptFile.url
+      // Track download
+      try {
+        await api.post(`/articles/${finalArticle._id}/download`)
+      } catch (error) {
+        console.error('Failed to track download:', error)
+      }
+      window.open(downloadUrl, '_blank')
     }
   }
 
-  const handleViewPDF = () => {
-    if (finalArticle.manuscriptFile?.url) {
-      window.open(finalArticle.manuscriptFile.url, '_blank')
+  const handleViewPDF = async () => {
+    if (finalArticle.manuscriptFile?.secureUrl || finalArticle.manuscriptFile?.url) {
+      const viewUrl = finalArticle.manuscriptFile.secureUrl || finalArticle.manuscriptFile.url
+      // Track view
+      try {
+        await api.post(`/articles/${finalArticle._id}/view`)
+      } catch (error) {
+        console.error('Failed to track view:', error)
+      }
+      window.open(viewUrl, '_blank')
     }
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <div className="border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link href={`/vol/${volumeNumber}`}>
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Volume {volumeNumber}
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Article Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Badge variant="secondary" className="text-sm">
-              Volume {volumeNumber}, Article {articleNumber}
-            </Badge>
-            <Badge variant="secondary" className="text-sm">
-              Research Article
-            </Badge>
-            {finalArticle.doi && (
-              <Badge variant="outline" className="text-sm">
-                DOI: {finalArticle.doi}
-              </Badge>
-            )}
-          </div>
-          
-          <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-6 leading-tight">
-            {finalArticle.title}
-          </h1>
-
-          {/* Authors */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground mb-3">Authors</h2>
-            <div className="flex flex-wrap gap-4">
-              {finalArticle.authors?.map((author: any, index: number) => (
-                <div key={index} className="flex items-center gap-2 text-muted-foreground">
-                  <User className="w-4 h-4" />
-                  <span>{author.firstName} {author.lastName}</span>
-                  {author.affiliation && (
-                    <>
-                      <Building className="w-4 h-4" />
-                      <span className="text-sm">{author.affiliation}</span>
-                    </>
-                  )}
-                </div>
-              ))}
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      {/* SEO: Structured Data & Meta Tags */}
+      <ArticleMetaTags article={finalArticle} />
+      
+      {/* Navigation Bar */}
+      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link href={`/vol/${volumeNumber}`}>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back to Volume {volumeNumber}</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Vol. {volumeNumber}</Badge>
+              <Badge variant="outline">Article {articleNumber}</Badge>
             </div>
           </div>
-
-          {/* Article Actions */}
-          <div className="flex flex-wrap gap-4 mb-8">
-            {finalArticle.manuscriptFile?.url && (
-              <>
-                <Button onClick={handleViewPDF} size="lg">
-                  <Eye className="w-4 h-4 mr-2" />
-                  View PDF
-                </Button>
-                <Button variant="outline" onClick={handleDownload} size="lg">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Article Content */}
-        <div className="space-y-8">
-          {/* Abstract */}
-          {finalArticle.abstract && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Abstract</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed">
-                  {finalArticle.abstract}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Keywords */}
-          {finalArticle.keywords && finalArticle.keywords.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Keywords</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {finalArticle.keywords.map((keyword: string, index: number) => (
-                    <Badge key={index} variant="secondary">
-                      {keyword}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Article Content */}
-          {finalArticle.content && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Article Content</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div 
-                  className="prose prose-gray max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: finalArticle.content }}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Article Metadata */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Article Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {finalArticle.publishedDate && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      Published: {format(new Date(finalArticle.publishedDate), "MMMM dd, yyyy")}
-                    </span>
-                  </div>
-                )}
-                {finalArticle.pages && (
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Pages: {finalArticle.pages}</span>
-                  </div>
-                )}
-                {finalArticle.doi && (
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-mono">DOI: {finalArticle.doi}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Views: {finalArticle.viewCount || 0}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
+
+      {/* Two-Column Layout */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          {/* Main Content */}
+          <div className="space-y-6">
+            {/* Article Header */}
+            <div className="space-y-4">
+              {/* Type Badges */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="default" className="text-sm">
+                  {finalArticle.type || 'Research Article'}
+                </Badge>
+                {finalArticle.featured && (
+                  <Badge variant="secondary" className="text-sm">
+                    ⭐ Featured
+                  </Badge>
+                )}
+                {finalArticle.status === 'published' && (
+                  <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200">
+                    Published
+                  </Badge>
+                )}
+              </div>
+
+              {/* Title */}
+              <h1 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight tracking-tight">
+                {finalArticle.title}
+              </h1>
+            </div>
+
+            {/* Authors Section */}
+            <AuthorCards 
+              authors={finalArticle.authors}
+            />
+
+            {/* Abstract - Highlighted */}
+            {finalArticle.abstract && (
+              <Card className="bg-gradient-to-br from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 border-amber-100 dark:border-amber-900">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                    Abstract
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-foreground leading-relaxed text-lg">
+                    {finalArticle.abstract}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Keywords */}
+            {finalArticle.keywords && finalArticle.keywords.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">Keywords</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {finalArticle.keywords.map((keyword: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-sm px-3 py-1">
+                        {keyword}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* PDF Viewer - Intelligent Rendering */}
+            <PDFViewer 
+              fileUrl={finalArticle.manuscriptFile?.secureUrl || finalArticle.manuscriptFile?.url}
+              fileName={finalArticle.manuscriptFile?.originalName}
+              fileFormat={finalArticle.manuscriptFile?.format}
+              fileSize={finalArticle.manuscriptFile?.bytes}
+              onDownload={handleDownload}
+            />
+
+            {/* Supplementary Files */}
+            {finalArticle.supplementaryFiles && finalArticle.supplementaryFiles.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">Supplementary Materials</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {finalArticle.supplementaryFiles.map((file: any, index: number) => (
+                      <div 
+                        key={index}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium text-sm">{file.originalName}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {file.format?.toUpperCase()} • {(file.bytes / 1024).toFixed(0)} KB
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(file.secureUrl || file.url, '_blank')}
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Related Articles */}
+            {relatedArticles.length > 0 && (
+              <RelatedArticles 
+                articles={relatedArticles}
+                title={`More from Volume ${volumeNumber}`}
+              />
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:sticky lg:top-20 h-fit">
+            <ArticleSidebar 
+              article={finalArticle}
+              onCiteClick={() => setShowCitationModal(true)}
+              onDownload={handleDownload}
+              onViewPDF={handleViewPDF}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Citation Modal */}
+      {showCitationModal && (
+        <CitationModal 
+          isOpen={showCitationModal}
+          onClose={() => setShowCitationModal(false)}
+          article={finalArticle}
+        />
+      )}
     </div>
   )
 }

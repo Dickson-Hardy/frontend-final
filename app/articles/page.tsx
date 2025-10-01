@@ -73,6 +73,16 @@ export default function ArticlesPage() {
     ).join(', ')
   }
 
+  // SEO: Update page title and meta description
+  useEffect(() => {
+    document.title = 'Published Articles | AMHSJ - Advances in Medical & Health Sciences Journal'
+    const metaDescription = document.querySelector('meta[name="description"]')
+    const description = 'Browse our comprehensive collection of peer-reviewed research articles advancing medical science and healthcare innovation.'
+    if (metaDescription) {
+      metaDescription.setAttribute('content', description)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">

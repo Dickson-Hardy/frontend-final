@@ -100,47 +100,52 @@ function VolumeListingPage({ volumeNumber }: { volumeNumber: number }) {
       const zip = new JSZip()
       const volumeFolder = zip.folder(`Volume_${volumeNumber}_Articles`)
 
+      let successCount = 0
+      let failedCount = 0
+
       // Add each article to the ZIP
       for (const article of articles) {
-        const articleContent = {
-          title: article.title,
-          authors: article.authors?.map((author: any) => 
-            `${author.firstName} ${author.lastName}`
-          ).join(", ") || "Unknown Authors",
-          abstract: article.abstract,
-          content: article.content || "Content not available",
-          keywords: article.keywords?.join(", ") || "",
-          doi: article.doi || "",
-          pages: article.pages || "",
-          publishDate: article.publishedDate ? format(new Date(article.publishedDate), "MMMM dd, yyyy") : "Not published",
-          articleNumber: article.articleNumber || "N/A"
+        try {
+          // Track download for this article
+          if (article._id) {
+            await api.post(`/articles/${article._id}/download`).catch(err => 
+              console.log('Failed to track download for article:', article._id)
+            )
+          }
+
+          // Check if article has PDF file
+          const pdfUrl = article.manuscriptFile?.secureUrl || article.manuscriptFile?.url
+          
+          if (pdfUrl) {
+            // Fetch the actual PDF file
+            const response = await fetch(pdfUrl)
+            
+            if (response.ok) {
+              const blob = await response.blob()
+              const fileName = `Article_${article.articleNumber || 'Unknown'}_${article.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.pdf`
+              volumeFolder?.file(fileName, blob)
+              successCount++
+              console.log(`✅ Added PDF: ${fileName}`)
+            } else {
+              console.warn(`Failed to fetch PDF for article: ${article.title}`)
+              failedCount++
+              // Create a metadata text file as fallback
+              const metadataFile = createArticleMetadataText(article)
+              const fileName = `Article_${article.articleNumber || 'Unknown'}_${article.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}_METADATA.txt`
+              volumeFolder?.file(fileName, metadataFile)
+            }
+          } else {
+            // No PDF available, create metadata text file
+            console.warn(`No PDF available for article: ${article.title}`)
+            failedCount++
+            const metadataFile = createArticleMetadataText(article)
+            const fileName = `Article_${article.articleNumber || 'Unknown'}_${article.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}_METADATA.txt`
+            volumeFolder?.file(fileName, metadataFile)
+          }
+        } catch (error) {
+          console.error(`Error processing article ${article.title}:`, error)
+          failedCount++
         }
-
-        // Create a formatted text file for each article
-        const articleText = `
-TITLE: ${articleContent.title}
-
-AUTHORS: ${articleContent.authors}
-
-ARTICLE NUMBER: ${articleContent.articleNumber}
-
-DOI: ${articleContent.doi}
-
-PAGES: ${articleContent.pages}
-
-PUBLISH DATE: ${articleContent.publishDate}
-
-KEYWORDS: ${articleContent.keywords}
-
-ABSTRACT:
-${articleContent.abstract}
-
-CONTENT:
-${articleContent.content}
-        `.trim()
-
-        const fileName = `Article_${article.articleNumber || 'Unknown'}_${article.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.txt`
-        volumeFolder?.file(fileName, articleText)
       }
 
       // Generate and download the ZIP file
@@ -157,7 +162,9 @@ ${articleContent.content}
 
       toast({
         title: "Download completed",
-        description: `All ${articles.length} articles from Volume ${volumeNumber} have been downloaded as a ZIP file.`
+        description: successCount > 0
+          ? `Downloaded ${successCount} PDF file(s) from Volume ${volumeNumber}.${failedCount > 0 ? ` ${failedCount} article(s) had no PDF available.` : ''}`
+          : `Volume ${volumeNumber} articles downloaded (metadata only - PDFs not available).`
       })
 
     } catch (error) {
@@ -170,6 +177,36 @@ ${articleContent.content}
     } finally {
       setDownloadingZip(false)
     }
+  }
+
+  // Helper function to create article metadata text
+  function createArticleMetadataText(article: Article): string {
+    return `
+TITLE: ${article.title}
+
+AUTHORS: ${article.authors?.map((author: any) => 
+      `${author.firstName} ${author.lastName}`
+    ).join(", ") || "Unknown Authors"}
+
+ARTICLE NUMBER: ${article.articleNumber || "N/A"}
+
+DOI: ${article.doi || "N/A"}
+
+PAGES: ${article.pages || "N/A"}
+
+PUBLISH DATE: ${article.publishedDate ? format(new Date(article.publishedDate), "MMMM dd, yyyy") : "Not published"}
+
+KEYWORDS: ${article.keywords?.join(", ") || "N/A"}
+
+ABSTRACT:
+${article.abstract || "No abstract available"}
+
+${article.content ? `CONTENT:\n${article.content}` : "Full content not available in metadata."}
+
+---
+Note: This is a metadata file. The PDF was not available for download.
+PDF URL: ${article.manuscriptFile?.secureUrl || article.manuscriptFile?.url || "Not available"}
+    `.trim()
   }
 
   if (volumeLoading || articlesLoading) {
@@ -393,11 +430,29 @@ ${articleContent.content}
 function ArticleDetailPage({ parsedUrl }: { parsedUrl: { volumeNumber: number; articleNumber: string } }) {
   const { volumeNumber, articleNumber } = parsedUrl
   const [showCitationModal, setShowCitationModal] = useState(false)
+  const [viewTracked, setViewTracked] = useState(false)
   
   // Find article by volume and article number using the new API endpoint
   const { data: finalArticle, isLoading } = useApi<Article>(
     `/articles/volume/${volumeNumber}/article/${articleNumber}`
   )
+  
+  // Automatically track page view when article loads (only once)
+  useEffect(() => {
+    const trackView = async () => {
+      if (finalArticle?._id && !viewTracked) {
+        try {
+          await api.post(`/articles/${finalArticle._id}/view`)
+          setViewTracked(true)
+          console.log('📊 Article view tracked')
+        } catch (error) {
+          console.error('Failed to track article view:', error)
+        }
+      }
+    }
+    
+    trackView()
+  }, [finalArticle?._id, viewTracked])
 
   // Fetch other articles from the same volume for related articles
   const volumeId = typeof finalArticle?.volume === 'object' ? finalArticle.volume._id : null
@@ -459,12 +514,7 @@ function ArticleDetailPage({ parsedUrl }: { parsedUrl: { volumeNumber: number; a
   const handleViewPDF = async () => {
     if (finalArticle.manuscriptFile?.secureUrl || finalArticle.manuscriptFile?.url) {
       const viewUrl = finalArticle.manuscriptFile.secureUrl || finalArticle.manuscriptFile.url
-      // Track view
-      try {
-        await api.post(`/articles/${finalArticle._id}/view`)
-      } catch (error) {
-        console.error('Failed to track view:', error)
-      }
+      // View is already tracked on page load, just open the PDF
       window.open(viewUrl, '_blank')
     }
   }

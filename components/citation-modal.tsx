@@ -71,10 +71,10 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl lg:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Quote className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Quote className="w-4 h-4 sm:w-5 sm:h-5" />
             Cite This Article
           </DialogTitle>
         </DialogHeader>
@@ -82,11 +82,11 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
         <div className="space-y-6">
           {/* Article Info */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">{article.title}</CardTitle>
+            <CardHeader className="pb-3 p-3 sm:p-6">
+              <CardTitle className="text-sm sm:text-base md:text-lg leading-tight">{article.title}</CardTitle>
               <CardDescription>
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span>
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                  <span className="break-words">
                     {article.authors.map((author, index) => (
                       <span key={index}>
                         {[author.title, author.firstName, author.lastName].filter(Boolean).join(' ')}
@@ -96,16 +96,16 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
                   </span>
                   {article.publishedDate && (
                     <>
-                      <span>•</span>
-                      <span>{article.publishedDate instanceof Date ? 
+                      <span className="hidden sm:inline">•</span>
+                      <span className="sm:inline block w-full sm:w-auto">{article.publishedDate instanceof Date ? 
                         article.publishedDate.getFullYear() : 
                         new Date(article.publishedDate).getFullYear()}</span>
                     </>
                   )}
                   {article.doi && (
                     <>
-                      <span>•</span>
-                      <Badge variant="outline" className="text-xs">
+                      <span className="hidden sm:inline">•</span>
+                      <Badge variant="outline" className="text-[10px] sm:text-xs">
                         DOI: {article.doi}
                       </Badge>
                     </>
@@ -117,14 +117,14 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
 
           {/* Citation Formats */}
           <Tabs defaultValue="custom" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 h-auto">
               {Object.entries(citationFormats).map(([key, format]) => {
                 const Icon = formatIcons[key as keyof typeof formatIcons];
                 return (
-                  <TabsTrigger key={key} value={key} className="flex items-center gap-1">
-                    <Icon className="w-3 h-3" />
-                    <span className="hidden sm:inline">{format.name.split(' ')[0]}</span>
-                    <span className="sm:hidden">{key.toUpperCase()}</span>
+                  <TabsTrigger key={key} value={key} className="flex items-center gap-1 text-xs sm:text-sm px-2 py-2">
+                    <Icon className="w-3 h-3 shrink-0" />
+                    <span className="hidden md:inline">{format.name.split(' ')[0]}</span>
+                    <span className="md:hidden uppercase">{key.slice(0, 3)}</span>
                   </TabsTrigger>
                 );
               })}
@@ -133,35 +133,35 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
             {Object.entries(citationFormats).map(([key, format]) => (
               <TabsContent key={key} value={key}>
                 <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{format.name}</CardTitle>
-                        <CardDescription>{format.description}</CardDescription>
+                  <CardHeader className="p-3 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <CardTitle className="text-base sm:text-lg">{format.name}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">{format.description}</CardDescription>
                       </div>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleCopy(format.generate(citationArticle), key)}
-                        className="gap-2"
+                        className="gap-2 shrink-0 w-full sm:w-auto"
                       >
                         {copiedFormat === key ? (
                           <>
                             <Check className="w-4 h-4 text-green-600" />
-                            Copied!
+                            <span className="text-xs sm:text-sm">Copied!</span>
                           </>
                         ) : (
                           <>
                             <Copy className="w-4 h-4" />
-                            Copy
+                            <span className="text-xs sm:text-sm">Copy</span>
                           </>
                         )}
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className={`p-4 rounded-lg border bg-muted/50 ${key === 'bibtex' ? 'font-mono text-sm' : ''}`}>
-                      <div className="whitespace-pre-wrap break-words">
+                  <CardContent className="p-3 sm:p-6 pt-0">
+                    <div className={`p-3 sm:p-4 rounded-lg border bg-muted/50 ${key === 'bibtex' ? 'font-mono text-xs sm:text-sm' : 'text-xs sm:text-sm'}`}>
+                      <div className="whitespace-pre-wrap break-words overflow-x-auto">
                         {format.generate(citationArticle)}
                       </div>
                     </div>
@@ -173,20 +173,20 @@ export function CitationModal({ isOpen, onClose, article }: CitationModalProps) 
 
           {/* Citation Guidelines */}
           <Card className="bg-blue-50 border-blue-200">
-            <CardHeader>
-              <CardTitle className="text-lg text-blue-900">Citation Guidelines</CardTitle>
+            <CardHeader className="p-3 sm:p-6">
+              <CardTitle className="text-base sm:text-lg text-blue-900">Citation Guidelines</CardTitle>
             </CardHeader>
-            <CardContent className="text-blue-800 space-y-2">
-              <p className="text-sm">
+            <CardContent className="text-blue-800 space-y-1.5 sm:space-y-2 p-3 sm:p-6 pt-0">
+              <p className="text-xs sm:text-sm">
                 • Always verify citation requirements with your target journal or institution
               </p>
-              <p className="text-sm">
+              <p className="text-xs sm:text-sm">
                 • Include the DOI when available for better accessibility and tracking
               </p>
-              <p className="text-sm">
+              <p className="text-xs sm:text-sm">
                 • For online-only articles, include the access date if required by your style guide
               </p>
-              <p className="text-sm">
+              <p className="text-xs sm:text-sm">
                 • Check for any specific formatting requirements for medical journals
               </p>
             </CardContent>

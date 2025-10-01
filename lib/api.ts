@@ -159,7 +159,6 @@ export interface NewsItem {
 export interface JournalStatistics {
   totalArticles: number
   totalCountries: number
-  impactFactor: number
   totalVolumes: number
   totalUsers: number
 }

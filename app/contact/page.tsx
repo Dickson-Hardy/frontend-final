@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -24,11 +25,43 @@ import {
   ExternalLink,
   MessageSquare,
   Building,
-  Globe
+  Globe,
+  Loader2
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "@/hooks/use-toast"
 
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [inquiryType, setInquiryType] = useState("")
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      toast({
+        title: "Message Sent Successfully",
+        description: "We'll get back to you within 24-48 hours.",
+      })
+
+      // Reset form
+      const form = e.target as HTMLFormElement
+      form.reset()
+      setInquiryType("")
+    } catch (error) {
+      toast({
+        title: "Error Sending Message",
+        description: "Please try again or contact us directly via email.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -157,31 +190,60 @@ export default function ContactPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name *</Label>
-                    <Input id="firstName" placeholder="Enter your first name" required />
+                    <Input 
+                      id="firstName" 
+                      name="firstName"
+                      placeholder="Enter your first name" 
+                      required 
+                      disabled={isSubmitting}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name *</Label>
-                    <Input id="lastName" placeholder="Enter your last name" required />
+                    <Input 
+                      id="lastName" 
+                      name="lastName"
+                      placeholder="Enter your last name" 
+                      required 
+                      disabled={isSubmitting}
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
-                  <Input id="email" type="email" placeholder="Enter your email address" required />
+                  <Input 
+                    id="email" 
+                    name="email"
+                    type="email" 
+                    placeholder="Enter your email address" 
+                    required 
+                    disabled={isSubmitting}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="affiliation">Affiliation</Label>
-                  <Input id="affiliation" placeholder="Your institution or organization" />
+                  <Input 
+                    id="affiliation" 
+                    name="affiliation"
+                    placeholder="Your institution or organization" 
+                    disabled={isSubmitting}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="inquiryType">Inquiry Type *</Label>
-                  <Select>
+                  <Select 
+                    value={inquiryType} 
+                    onValueChange={setInquiryType}
+                    disabled={isSubmitting}
+                    required
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select inquiry type" />
                     </SelectTrigger>
@@ -199,22 +261,39 @@ export default function ContactPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject *</Label>
-                  <Input id="subject" placeholder="Brief subject of your inquiry" required />
+                  <Input 
+                    id="subject" 
+                    name="subject"
+                    placeholder="Brief subject of your inquiry" 
+                    required 
+                    disabled={isSubmitting}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="message">Message *</Label>
                   <Textarea 
                     id="message" 
+                    name="message"
                     placeholder="Please provide details about your inquiry..." 
                     rows={6}
                     required 
+                    disabled={isSubmitting}
                   />
                 </div>
 
-                <Button type="submit" className="w-full gap-2">
-                  <Send className="w-4 h-4" />
-                  Send Message
+                <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending Message...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Message
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>

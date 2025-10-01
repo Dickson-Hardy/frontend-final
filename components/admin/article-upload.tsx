@@ -519,8 +519,14 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
           {/* Submit Button */}
           <div className="flex items-center justify-end pt-6 border-t">
             <Button type="submit" disabled={!isFormValid() || isUploading}>
-              {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Upload Article
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading Article...
+                </>
+              ) : (
+                "Upload Article"
+              )}
             </Button>
           </div>
         </form>

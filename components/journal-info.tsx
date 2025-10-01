@@ -21,11 +21,6 @@ const journalStats = [
     description: "Rigorous double-blind peer review process ensuring quality",
   },
   {
-    icon: TrendingUp,
-    title: "Impact Factor 4.2",
-    description: "Recognized for high-quality research and citation impact",
-  },
-  {
     icon: Users,
     title: "Expert Editorial Board",
     description: "Leading medical professionals and researchers guide our standards",

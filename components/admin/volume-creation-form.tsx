@@ -376,8 +376,14 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
               Cancel
             </Button>
             <Button type="submit" disabled={!isFormValid() || isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Volume
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Volume...
+                </>
+              ) : (
+                "Create Volume"
+              )}
             </Button>
           </div>
         </form>

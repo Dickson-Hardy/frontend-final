@@ -55,7 +55,7 @@ export function HeroSection() {
 
             {/* Stats */}
             {statistics && (
-              <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border">
+              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-border">
                 <div className="text-center sm:text-left">
                   <div className="text-2xl font-bold text-primary">
                     {formatNumber(statistics.totalArticles)}
@@ -68,18 +68,12 @@ export function HeroSection() {
                   </div>
                   <div className="text-sm text-muted-foreground">Countries</div>
                 </div>
-                <div className="text-center sm:text-left">
-                  <div className="text-2xl font-bold text-primary">
-                    {statistics.impactFactor.toFixed(1)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Impact Factor</div>
-                </div>
               </div>
             )}
             
             {/* Loading State */}
             {isLoading && (
-              <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border">
+              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-border">
                 <div className="text-center sm:text-left">
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -91,12 +85,6 @@ export function HeroSection() {
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   </div>
                   <div className="text-sm text-muted-foreground">Countries</div>
-                </div>
-                <div className="text-center sm:text-left">
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                  <div className="text-sm text-muted-foreground">Impact Factor</div>
                 </div>
               </div>
             )}

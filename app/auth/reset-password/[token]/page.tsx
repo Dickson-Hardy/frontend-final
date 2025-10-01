@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react"
+import { Lock, Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -169,7 +169,14 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Updating Password..." : "Update Password"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating Password...
+                  </>
+                ) : (
+                  "Update Password"
+                )}
               </Button>
             </form>
           </CardContent>

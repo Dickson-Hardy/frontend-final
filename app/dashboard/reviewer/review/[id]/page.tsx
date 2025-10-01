@@ -9,9 +9,12 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { FileText, Download, Star, Clock, User, Building, AlertCircle, CheckCircle } from "lucide-react"
+import { FileText, Download, Star, Clock, User, Building, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 export default function ReviewPage({ params }: { params: { id: string } }) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [reviewData, setReviewData] = useState({
     overallRating: "",
     originality: "",
@@ -43,14 +46,46 @@ export default function ReviewPage({ params }: { params: { id: string } }) {
     ],
   }
 
-  const handleSubmit = () => {
-    console.log("Submitting review:", reviewData)
-    // Submit review logic
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      console.log("Submitting review:", reviewData)
+      toast({
+        title: "Review Submitted",
+        description: "Your review has been submitted successfully."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleSaveDraft = () => {
-    console.log("Saving draft:", reviewData)
-    // Save draft logic
+  const handleSaveDraft = async () => {
+    setIsSavingDraft(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
+      console.log("Saving draft:", reviewData)
+      toast({
+        title: "Draft Saved",
+        description: "Your review draft has been saved."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save draft. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSavingDraft(false)
+    }
   }
 
   return (
@@ -62,11 +97,25 @@ export default function ReviewPage({ params }: { params: { id: string } }) {
           <p className="text-muted-foreground mt-2">Review ID: {manuscript.id}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSaveDraft}>
-            Save Draft
+          <Button variant="outline" onClick={handleSaveDraft} disabled={isSavingDraft || isSubmitting}>
+            {isSavingDraft ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Draft"
+            )}
           </Button>
-          <Button onClick={handleSubmit}>
-            Submit Review
+          <Button onClick={handleSubmit} disabled={isSubmitting || isSavingDraft}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Review"
+            )}
           </Button>
         </div>
       </div>

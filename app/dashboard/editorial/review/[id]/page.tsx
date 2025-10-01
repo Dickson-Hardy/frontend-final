@@ -9,9 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { FileText, Download, CheckCircle, AlertCircle, Clock, User, Building } from "lucide-react"
+import { FileText, Download, CheckCircle, AlertCircle, Clock, User, Building, Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 export default function EditorialReviewPage({ params }: { params: { id: string } }) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isAssigning, setIsAssigning] = useState(false)
   const [reviewData, setReviewData] = useState({
     formattingCheck: false,
     ethicsApproval: false,
@@ -46,14 +49,46 @@ export default function EditorialReviewPage({ params }: { params: { id: string }
     },
   }
 
-  const handleSubmit = () => {
-    console.log("Submitting editorial review:", reviewData)
-    // Submit review logic
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      console.log("Submitting editorial review:", reviewData)
+      toast({
+        title: "Review Completed",
+        description: "Editorial review has been completed successfully."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to complete review. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleAssignEditor = () => {
-    console.log("Assigning editor")
-    // Assign editor logic
+  const handleAssignEditor = async () => {
+    setIsAssigning(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
+      console.log("Assigning editor")
+      toast({
+        title: "Editor Assigned",
+        description: "An editor has been assigned to this manuscript."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign editor. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsAssigning(false)
+    }
   }
 
   return (
@@ -65,11 +100,25 @@ export default function EditorialReviewPage({ params }: { params: { id: string }
           <p className="text-muted-foreground mt-2">Manuscript ID: {manuscript.id}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleAssignEditor}>
-            Assign Editor
+          <Button variant="outline" onClick={handleAssignEditor} disabled={isAssigning || isSubmitting}>
+            {isAssigning ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Assigning...
+              </>
+            ) : (
+              "Assign Editor"
+            )}
           </Button>
-          <Button onClick={handleSubmit}>
-            Complete Review
+          <Button onClick={handleSubmit} disabled={isSubmitting || isAssigning}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Completing...
+              </>
+            ) : (
+              "Complete Review"
+            )}
           </Button>
         </div>
       </div>

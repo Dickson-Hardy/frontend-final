@@ -31,6 +31,7 @@ export default function AnnouncementsPage() {
   const { user } = useAuth()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -206,13 +207,28 @@ export default function AnnouncementsPage() {
     })
   }
 
-  const handleDelete = (id: string) => {
-    setAnnouncements(prev => prev.filter(ann => ann.id !== id))
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this announcement?')) return
     
-    toast({
-      title: "Announcement Deleted",
-      description: "The announcement has been deleted."
-    })
+    setDeletingId(id)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setAnnouncements(prev => prev.filter(ann => ann.id !== id))
+      
+      toast({
+        title: "Announcement Deleted",
+        description: "The announcement has been deleted."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete announcement.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   return (
@@ -394,9 +410,14 @@ export default function AnnouncementsPage() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleDelete(announcement.id)}
+                      disabled={deletingId === announcement.id}
                       className="text-red-600 hover:text-red-700"
                     >
-                      <Trash2 className="mr-1 h-3 w-3" />
+                      {deletingId === announcement.id ? (
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-1 h-3 w-3" />
+                      )}
                       Delete
                     </Button>
                   </div>

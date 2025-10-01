@@ -36,17 +36,6 @@ export default function AdminNewsPage() {
     },
     {
       id: "NEWS-003",
-      title: "Journal Impact Factor Increases to 3.2",
-      content: "We are delighted to announce that AMHSJ's impact factor has increased to 3.2, reflecting the growing recognition of our journal in the medical research community. This achievement is a testament to the quality of research published in our journal.",
-      status: "published",
-      publishedDate: "2024-01-15",
-      author: "Dr. Michael Smith",
-      category: "Achievement",
-      views: 312,
-      featured: true,
-    },
-    {
-      id: "NEWS-004",
       title: "Upcoming Conference: Medical Research Symposium 2024",
       content: "AMHSJ is proud to sponsor the Medical Research Symposium 2024, scheduled for March 15-17, 2024. The conference will feature presentations from leading researchers and provide networking opportunities for the medical research community.",
       status: "draft",

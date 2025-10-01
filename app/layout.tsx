@@ -6,8 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { QueryProvider } from "@/components/providers/query-provider"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
+import { LayoutWrapper } from "@/components/layout-wrapper"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -72,11 +71,9 @@ export default function RootLayout({
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
         <QueryProvider>
           <AuthProvider>
-            <Navigation />
-            <main className="min-h-screen">
+            <LayoutWrapper>
               <Suspense fallback={null}>{children}</Suspense>
-            </main>
-            <Footer />
+            </LayoutWrapper>
           </AuthProvider>
         </QueryProvider>
         <Analytics />

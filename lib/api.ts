@@ -276,3 +276,46 @@ export const adminArticleService = {
     api.delete(`/admin/articles/${id}/supplementary/${fileIndex}`),
   delete: (id: string) => api.delete(`/admin/articles/${id}`),
 }
+
+export interface User {
+  _id: string
+  firstName: string
+  lastName: string
+  email: string
+  role: string
+  status: string
+  affiliation?: string
+  department?: string
+  orcidId?: string
+  bio?: string
+  specializations?: string[]
+  profileImage?: UploadResult
+  lastLogin?: Date
+  emailVerified: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface UsersListResponse {
+  data: User[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export const userService = {
+  getAll: (params?: { page?: number; limit?: number; role?: string; search?: string }) => {
+    const queryParams = new URLSearchParams()
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.limit) queryParams.append('limit', params.limit.toString())
+    if (params?.role) queryParams.append('role', params.role)
+    if (params?.search) queryParams.append('search', params.search)
+    return api.get<UsersListResponse>(`/users?${queryParams.toString()}`)
+  },
+  getById: (id: string) => api.get<User>(`/users/${id}`),
+  getReviewers: () => api.get<User[]>('/users/reviewers'),
+  create: (data: Partial<User>) => api.post<User>("/users", data),
+  update: (id: string, data: Partial<User>) => api.patch<User>(`/users/${id}`, data),
+  delete: (id: string) => api.delete(`/users/${id}`),
+}

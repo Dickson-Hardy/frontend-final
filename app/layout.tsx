@@ -10,6 +10,7 @@ import { LayoutWrapper } from "@/components/layout-wrapper"
 import "./globals.css"
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://amhsj.org'),
   title: "AMHSJ - Advances in Medical & Health Sciences Journal",
   description: "Peer-reviewed medical journal advancing healthcare through research, innovation, and global collaboration.",
   generator: "v0.app",
@@ -20,6 +21,12 @@ export const metadata: Metadata = {
     "peer-reviewed",
     "AMHSJ"
   ],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },

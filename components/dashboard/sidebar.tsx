@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -10,9 +10,17 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Users, Settings, BarChart3, BookOpen, UserCheck, ClipboardList, MessageSquare, Bell, Home, ChevronLeft, ChevronRight, LogOut, User, Megaphone, Book, Upload, FolderOpen, Hash } from 'lucide-react'
+import { FileText, Users, Settings, BarChart3, BookOpen, UserCheck, ClipboardList, MessageSquare, Bell, Home, ChevronLeft, ChevronRight, LogOut, User, Megaphone, Book, Upload, FolderOpen, Hash, Menu, X } from 'lucide-react'
 import { useAuth } from "@/components/auth/auth-provider"
 import { logout, type UserRole } from "@/lib/auth"
+import { useIsMobile } from "@/hooks/use-mobile"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 interface NavItem {
   title: string
@@ -226,8 +234,10 @@ const getNavigationItems = (userRole: UserRole): NavItem[] => {
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const { user } = useAuth()
+  const isMobile = useIsMobile()
 
   const navigationItems = user ? getNavigationItems(user.role) : []
 
@@ -239,7 +249,15 @@ export function Sidebar() {
     logout()
   }
 
-  const renderNavItem = (item: NavItem, level = 0) => {
+  // Get primary navigation items for mobile bottom nav (limit to 4-5 most important)
+  const getPrimaryNavItems = (): NavItem[] => {
+    const items = navigationItems.slice(0, 5)
+    return items
+  }
+
+  const primaryNavItems = getPrimaryNavItems()
+
+  const renderNavItem = (item: NavItem, level = 0, inMobileSheet = false) => {
     const isActive = pathname === item.href
     const isExpanded = expandedItems.includes(item.href)
     const hasChildren = item.children && item.children.length > 0
@@ -251,13 +269,13 @@ export function Sidebar() {
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-sidebar-accent",
             isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
             level > 0 && "ml-4",
-            collapsed && "justify-center px-2",
+            collapsed && !inMobileSheet && "justify-center px-2",
           )}
         >
           {hasChildren ? (
             <button onClick={() => toggleExpanded(item.href)} className="flex items-center gap-3 flex-1 text-left">
               <item.icon className="h-4 w-4 shrink-0" />
-              {!collapsed && (
+              {(!collapsed || inMobileSheet) && (
                 <>
                   <span className="flex-1">{item.title}</span>
                   {item.badge && (
@@ -270,9 +288,13 @@ export function Sidebar() {
               )}
             </button>
           ) : (
-            <Link href={item.href} className="flex items-center gap-3 flex-1">
+            <Link 
+              href={item.href} 
+              className="flex items-center gap-3 flex-1"
+              onClick={() => inMobileSheet && setMobileMenuOpen(false)}
+            >
               <item.icon className="h-4 w-4 shrink-0" />
-              {!collapsed && (
+              {(!collapsed || inMobileSheet) && (
                 <>
                   <span className="flex-1">{item.title}</span>
                   {item.badge && (
@@ -286,13 +308,113 @@ export function Sidebar() {
           )}
         </div>
 
-        {hasChildren && isExpanded && !collapsed && (
-          <div className="mt-1 space-y-1">{item.children?.map((child) => renderNavItem(child, level + 1))}</div>
+        {hasChildren && isExpanded && (!collapsed || inMobileSheet) && (
+          <div className="mt-1 space-y-1">{item.children?.map((child) => renderNavItem(child, level + 1, inMobileSheet))}</div>
         )}
       </div>
     )
   }
 
+  // Mobile Bottom Navigation
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile Bottom Navigation Bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border">
+          <nav className="flex items-center justify-around px-2 py-2 safe-area-bottom">
+            {primaryNavItems.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px]",
+                    isActive 
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  )}
+                >
+                  <div className="relative">
+                    <item.icon className="h-5 w-5" />
+                    {item.badge && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-[10px]"
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-medium leading-none">{item.title}</span>
+                </Link>
+              )
+            })}
+            
+            {/* More Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px] text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
+                  <Menu className="h-5 w-5" />
+                  <span className="text-[10px] font-medium leading-none">More</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <Image
+                      src="/logo.png"
+                      alt="AMHSJ Logo"
+                      width={32}
+                      height={32}
+                      className="w-8 h-8 object-contain"
+                    />
+                    <div>
+                      <h2 className="text-sm font-semibold">AMHSJ Dashboard</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {user ? `${user.firstName} ${user.lastName}` : "User"}
+                      </p>
+                    </div>
+                  </SheetTitle>
+                </SheetHeader>
+                
+                <ScrollArea className="h-[calc(85vh-120px)] mt-4">
+                  <nav className="space-y-1 px-2">
+                    {navigationItems.map((item) => renderNavItem(item, 0, true))}
+                  </nav>
+
+                  {/* User Actions in Sheet */}
+                  <div className="border-t border-border mt-4 pt-4 px-2 space-y-2">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start gap-2 text-destructive hover:text-destructive" 
+                      onClick={() => {
+                        handleLogout()
+                        setMobileMenuOpen(false)
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </Button>
+                  </div>
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+          </nav>
+        </div>
+      </>
+    )
+  }
+
+  // Desktop Sidebar
   return (
     <div
       className={cn(
@@ -324,7 +446,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-1">{navigationItems.map((item) => renderNavItem(item))}</nav>
+        <nav className="space-y-1">{navigationItems.map((item) => renderNavItem(item, 0, false))}</nav>
       </ScrollArea>
 
       {/* User Profile & Settings */}

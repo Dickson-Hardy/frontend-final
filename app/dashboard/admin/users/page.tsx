@@ -37,6 +37,11 @@ export default function AdminUsersPage() {
     `/users?${new URLSearchParams(Object.entries(apiParams).map(([k, v]) => [k, String(v)])).toString()}`
   )
 
+  // Debug logging
+  console.log('👥 Users Response:', usersResponse)
+  console.log('👥 Users Data:', usersResponse?.data)
+  console.log('👥 Is Array?:', Array.isArray(usersResponse?.data))
+
   const users = usersResponse?.data || []
   const totalUsers = usersResponse?.total || 0
 

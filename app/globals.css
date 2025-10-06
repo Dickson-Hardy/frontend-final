@@ -119,3 +119,37 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Safe area insets for mobile devices (iOS notch, Android navigation) */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Mobile touch optimization */
+  @media (max-width: 767px) {
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Hide scrollbar for mobile sheet content */
+  .mobile-sheet-content::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .mobile-sheet-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Smooth height transitions */
+  .transition-height {
+    transition: height 0.3s ease-in-out;
+  }
+}

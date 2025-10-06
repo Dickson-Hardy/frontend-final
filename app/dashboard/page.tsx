@@ -18,10 +18,10 @@ export default function DashboardPage() {
         associate_editor: "/dashboard/associate-editor",
         editorial_assistant: "/dashboard/editorial",
         reviewer: "/dashboard/reviewer",
-        author: "/dashboard/submissions"
+        author: "/dashboard/author"
       }
 
-      const redirectPath = roleRoutes[user.role] || "/dashboard/submissions"
+      const redirectPath = roleRoutes[user.role] || "/dashboard/author"
       router.replace(redirectPath)
     }
   }, [user, isLoading, router])

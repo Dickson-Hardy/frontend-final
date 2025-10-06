@@ -14,6 +14,7 @@ const nextConfig = {
   // Security headers for both development and production
   async headers() {
     const isProduction = process.env.NODE_ENV === 'production'
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
     
     // Base headers for all environments
     const baseHeaders = [
@@ -21,12 +22,12 @@ const nextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com",
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: https: blob:",
           "font-src 'self' data:",
-          "connect-src 'self' https://octopus-app-3jhrw.ondigitalocean.app " + (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'),
-          "frame-src 'self' https://github.com https://raw.githubusercontent.com https://*.github.io https://octopus-app-3jhrw.ondigitalocean.app blob: data:",
+          "connect-src 'self' https://octopus-app-3jhrw.ondigitalocean.app " + apiUrl,
+          "frame-src 'self' https://github.com https://raw.githubusercontent.com https://*.github.io https://octopus-app-3jhrw.ondigitalocean.app " + apiUrl + " blob: data: https://release-assets.githubusercontent.com",
           "object-src 'none'",
           "base-uri 'self'",
         ].join('; '),

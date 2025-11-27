@@ -36,7 +36,7 @@ export default function EditorialBoardPage() {
                     <GraduationCap className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Prof. Tubonye C. Harry</CardTitle>
+                    <CardTitle className="text-xl">Prof. I.A. Ibrahim</CardTitle>
                     <Badge variant="secondary" className="mt-1">Editor-in-Chief</Badge>
                   </div>
                 </div>

@@ -250,7 +250,7 @@ export default function AboutPage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span className="font-medium">Title:</span>
-                  <span className="text-muted-foreground">Advances in Medicine and Health Sciences Research (AMHSJ)</span>
+                  <span className="text-muted-foreground">Advances in Medicine & Health Sciences Journal (AMHSJ)</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">ISSN:</span>
@@ -419,10 +419,6 @@ export default function AboutPage() {
                 <div className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">editor@amhsj.org</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">+234 813 198 1600</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-muted-foreground mt-1" />

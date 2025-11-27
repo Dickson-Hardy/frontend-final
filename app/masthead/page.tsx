@@ -24,7 +24,7 @@ export default function MastheadPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-semibold text-foreground">Prof Tubonye C Harry</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Prof I.A. Ibrahim</h3>
                   <p className="text-muted-foreground">Editor-in-Chief</p>
                 </div>
                 <Badge variant="outline">Contact</Badge>
@@ -160,7 +160,7 @@ export default function MastheadPage() {
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">Editor-in-Chief:</h3>
                 <p className="text-muted-foreground">editor@amhsj.org</p>
-                <p className="text-muted-foreground">+234 813 198 1600</p>
+                {/* <p className="text-muted-foreground">+234 813 198 1600</p> */}
               </div>
               <Separator />
               <div>

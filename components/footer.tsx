@@ -111,13 +111,13 @@ export function Footer() {
             <Mail className="w-4 h-4 text-primary-foreground/60" />
             <span className="text-primary-foreground/80">editor@amhsj.org</span>
           </div>
-          <div className="flex items-center space-x-3 text-sm">
+          {/* <div className="flex items-center space-x-3 text-sm">
             <Phone className="w-4 h-4 text-primary-foreground/60" />
-            <span className="text-primary-foreground/80">+1 (555) 123-4567</span>
-          </div>
+            <span className="text-primary-foreground/80">+234 813 198 1600</span>
+          </div> */}
           <div className="flex items-center space-x-3 text-sm">
             <MapPin className="w-4 h-4 text-primary-foreground/60" />
-            <span className="text-primary-foreground/80">Medical Research Center</span>
+            <span className="text-primary-foreground/80">Bayelsa Medical University, Nigeria</span>
           </div>
         </div>
 

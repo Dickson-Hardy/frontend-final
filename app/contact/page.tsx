@@ -120,10 +120,10 @@ export default function ContactPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">+234 813 198 1600</span>
-                </div>
+                </div> */}
               </div>
               <p className="text-xs text-muted-foreground">Monday - Friday, 9:00 AM - 5:00 PM WAT</p>
             </CardContent>
@@ -467,8 +467,8 @@ export default function ContactPage() {
           <AlertDescription className="text-red-800">
             <strong>Urgent Editorial Matters:</strong> For time-sensitive editorial issues, ethical concerns, 
             or urgent publication matters, contact the Editor-in-Chief directly at 
-            <span className="font-mono ml-1">editor@amhsj.org</span> or call 
-            <span className="font-medium ml-1">+234 813 198 1600</span>
+            <span className="font-mono ml-1">editor@amhsj.org</span> {/* or call 
+            <span className="font-medium ml-1">+234 813 198 1600</span> */}
           </AlertDescription>
         </Alert>
 

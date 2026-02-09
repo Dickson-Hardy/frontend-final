@@ -263,6 +263,13 @@ export const editorialDecisionService = {
   getByArticle: (articleId: string) => api.get(`/editorial-decisions/article/${articleId}`),
 }
 
+export const settingsService = {
+  getAll: () => api.get("/settings"),
+  getPublic: () => api.get("/settings/public"),
+  update: (settings: Record<string, any>) => api.put("/settings", { settings }),
+}
+
+
 
 export const adminArticleService = {
   getAll: () => api.get<Article[]>("/admin/articles"),

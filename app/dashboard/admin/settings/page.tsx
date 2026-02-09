@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { settingsService } from "@/lib/api"
+import { useApi } from "@/hooks/use-api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +19,8 @@ import { toast } from "@/hooks/use-toast"
 export default function SystemSettingsPage() {
   const { user } = useAuth()
   const [isSaving, setIsSaving] = useState(false)
+  const { data: settingsData, isLoading, refetch } = useApi('/settings')
+  
   const [settings, setSettings] = useState({
     // General Settings
     siteName: "AMHSJ - Advanced Medical Health Sciences Journal",
@@ -54,6 +58,13 @@ export default function SystemSettingsPage() {
     reminderFrequency: "weekly"
   })
 
+  // Load settings from API
+  useEffect(() => {
+    if (settingsData) {
+      setSettings(prev => ({ ...prev, ...settingsData }))
+    }
+  }, [settingsData])
+
   // Check if user has admin access
   if (!canAccessDashboard(user, 'admin')) {
     return (
@@ -75,17 +86,18 @@ export default function SystemSettingsPage() {
     setIsSaving(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      await settingsService.update(settings)
       
       toast({
         title: "Settings Saved",
         description: "All settings have been saved successfully."
       })
-    } catch (error) {
+      
+      refetch()
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save settings.",
+        description: error.response?.data?.message || "Failed to save settings.",
         variant: "destructive"
       })
     } finally {

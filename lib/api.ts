@@ -249,6 +249,21 @@ export const statisticsService = {
   getJournalStatistics: () => api.get<JournalStatistics>("/statistics/journal"),
 }
 
+export const announcementService = {
+  getAll: () => api.get("/announcements"),
+  getById: (id: string) => api.get(`/announcements/${id}`),
+  create: (data: any) => api.post("/announcements", data),
+  update: (id: string, data: any) => api.patch(`/announcements/${id}`, data),
+  delete: (id: string) => api.delete(`/announcements/${id}`),
+}
+
+export const editorialDecisionService = {
+  create: (data: any) => api.post("/editorial-decisions", data),
+  getById: (id: string) => api.get(`/editorial-decisions/${id}`),
+  getByArticle: (articleId: string) => api.get(`/editorial-decisions/article/${articleId}`),
+}
+
+
 export const adminArticleService = {
   getAll: () => api.get<Article[]>("/admin/articles"),
   getById: (id: string) => api.get<Article>(`/admin/articles/${id}`),

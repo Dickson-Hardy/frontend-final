@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, Bell, ArrowRight, Megaphone, Loader2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Calendar, Bell, ArrowRight, Megaphone } from "lucide-react"
 import { useFeaturedNews } from "@/hooks/use-api"
 import { format } from "date-fns"
 
@@ -12,10 +13,39 @@ export function NewsAnnouncements() {
 
   if (isLoading) {
     return (
-      <section className="py-16 bg-background">
+      <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="text-center mb-12">
+            <Skeleton className="h-8 w-32 mx-auto mb-4 rounded-full" />
+            <Skeleton className="h-10 w-3/4 max-w-lg mx-auto mb-4" />
+            <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+          </div>
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="border-border/50">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="w-8 h-8 rounded-lg" />
+                      <Skeleton className="h-5 w-16" />
+                    </div>
+                    <Skeleton className="h-5 w-20" />
+                  </div>
+                  <Skeleton className="h-7 w-3/4" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -24,10 +54,13 @@ export function NewsAnnouncements() {
 
   if (error || !newsItems) {
     return (
-      <section className="py-16 bg-background">
+      <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-red-600">Unable to load news items at this time.</p>
+            <p className="text-destructive">Unable to load news items at this time.</p>
+            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
           </div>
         </div>
       </section>
@@ -35,7 +68,7 @@ export function NewsAnnouncements() {
   }
 
   return (
-    <section className="py-16 bg-background">
+    <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">

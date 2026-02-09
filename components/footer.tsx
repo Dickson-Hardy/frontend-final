@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Mail, Phone, MapPin, Twitter, Linkedin, Facebook } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import { siteConfig } from "@/config/site"
 
 export function Footer() {
   return (
@@ -29,15 +31,24 @@ export function Footer() {
               collaboration.
             </p>
             <div className="flex space-x-3">
-              <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10">
-                <Twitter className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10">
-                <Linkedin className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10">
-                <Facebook className="w-4 h-4" />
-              </Button>
+              <Link href={siteConfig.links.twitter} target="_blank" rel="noreferrer">
+                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10">
+                  <Twitter className="w-4 h-4" />
+                  <span className="sr-only">Twitter</span>
+                </Button>
+              </Link>
+              <Link href={siteConfig.links.linkedin} target="_blank" rel="noreferrer">
+                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10">
+                  <Linkedin className="w-4 h-4" />
+                  <span className="sr-only">LinkedIn</span>
+                </Button>
+              </Link>
+              <Link href={siteConfig.links.facebook} target="_blank" rel="noreferrer">
+                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10">
+                  <Facebook className="w-4 h-4" />
+                  <span className="sr-only">Facebook</span>
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -45,21 +56,15 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold">Quick Links</h4>
             <div className="space-y-2 text-sm">
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Current Issue
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Archive
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Editorial Board
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Submission Guidelines
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Peer Review Process
-              </a>
+              {siteConfig.footerNav.quickLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  {item.title}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -67,21 +72,15 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold">Resources</h4>
             <div className="space-y-2 text-sm">
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Author Guidelines
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Reviewer Guidelines
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Ethics & Policies
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                Open Access
-              </a>
-              <a href="#" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                FAQ
-              </a>
+              {siteConfig.footerNav.resources.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  {item.title}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -127,15 +126,15 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-primary-foreground/60">
           <p>© 2025 Advances in Medicine & Health Sciences Journal. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-primary-foreground transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-primary-foreground transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-primary-foreground transition-colors">
-              Contact
-            </a>
+            {siteConfig.footerNav.legal.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="hover:text-primary-foreground transition-colors"
+              >
+                {item.title}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

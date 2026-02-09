@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, BookOpen, Users, Award, Loader2 } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Award } from "lucide-react"
 import { useApi } from "@/hooks/use-api"
 import { JournalStatistics } from "@/lib/api"
 import Link from "next/link"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function HeroSection() {
   const { data: statistics, isLoading } = useApi<JournalStatistics>('/statistics/journal')
@@ -16,6 +16,7 @@ export function HeroSection() {
     }
     return num.toString()
   }
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-secondary/20 to-background">
       {/* Background pattern */}
@@ -54,7 +55,18 @@ export function HeroSection() {
             </div>
 
             {/* Stats */}
-            {statistics && (
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-border">
+                <div className="text-center sm:text-left space-y-2">
+                  <Skeleton className="h-8 w-24" />
+                  <div className="text-sm text-muted-foreground">Published Articles</div>
+                </div>
+                <div className="text-center sm:text-left space-y-2">
+                  <Skeleton className="h-8 w-24" />
+                  <div className="text-sm text-muted-foreground">Countries</div>
+                </div>
+              </div>
+            ) : statistics ? (
               <div className="grid grid-cols-2 gap-8 pt-8 border-t border-border">
                 <div className="text-center sm:text-left">
                   <div className="text-2xl font-bold text-primary">
@@ -69,25 +81,7 @@ export function HeroSection() {
                   <div className="text-sm text-muted-foreground">Countries</div>
                 </div>
               </div>
-            )}
-            
-            {/* Loading State */}
-            {isLoading && (
-              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-border">
-                <div className="text-center sm:text-left">
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                  <div className="text-sm text-muted-foreground">Published Articles</div>
-                </div>
-                <div className="text-center sm:text-left">
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                  <div className="text-sm text-muted-foreground">Countries</div>
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Visual */}

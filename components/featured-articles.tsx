@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, User, ArrowRight, Loader2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Calendar, User, ArrowRight } from "lucide-react"
 import { useFeaturedArticles } from "@/hooks/use-api"
 import { format } from "date-fns"
 import { getArticleUrl } from "@/lib/url-utils"
@@ -16,8 +17,38 @@ export function FeaturedArticles() {
     return (
       <section className="py-24 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="text-center mb-16">
+            <Skeleton className="h-10 w-3/4 max-w-lg mx-auto mb-4" />
+            <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+          </div>
+          <div className="grid lg:grid-cols-3 gap-8 mb-12">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="h-full flex flex-col border-border/50">
+                <CardHeader className="space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-3/4" />
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1 flex flex-col">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                  <div className="space-y-3 pt-4 border-t border-border/50 mt-auto">
+                    <Skeleton className="h-4 w-1/2" />
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-8 w-24" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -29,7 +60,10 @@ export function FeaturedArticles() {
       <section className="py-24 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-red-600">Unable to load featured articles at this time.</p>
+            <p className="text-destructive">Unable to load featured articles at this time.</p>
+            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
           </div>
         </div>
       </section>

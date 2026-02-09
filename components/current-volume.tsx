@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Book, Calendar, FileText, ArrowRight, Download, Eye, Loader2 } from "lucide-react"
 import { useCurrentVolume, useRecentVolumes } from "@/hooks/use-api"
 import { format } from "date-fns"
@@ -93,8 +94,53 @@ export function CurrentVolume() {
     return (
       <section className="py-24 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="text-center mb-16">
+            <Skeleton className="h-8 w-32 mx-auto mb-4 rounded-full" />
+            <Skeleton className="h-10 w-3/4 max-w-lg mx-auto mb-4" />
+            <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+          </div>
+          
+          {/* Current Volume Skeleton */}
+          <div className="mb-16 border rounded-lg overflow-hidden shadow-lg bg-card">
+            <div className="grid lg:grid-cols-3 gap-0">
+              <div className="lg:col-span-1 p-8 flex items-center justify-center bg-muted/20">
+                <Skeleton className="w-full max-w-xs aspect-[3/4] rounded-lg" />
+              </div>
+              <div className="lg:col-span-2 p-8 space-y-6">
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                  <Skeleton className="h-10 w-3/4" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                  ))}
+                </div>
+                <div className="flex gap-4">
+                  <Skeleton className="h-12 w-40" />
+                  <Skeleton className="h-12 w-48" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Volumes Skeleton */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border rounded-lg p-4 space-y-4 bg-card">
+                <Skeleton className="w-full aspect-[3/4] rounded" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 w-9" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -106,7 +152,10 @@ export function CurrentVolume() {
       <section className="py-24 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-red-600">Unable to load volume information at this time.</p>
+            <p className="text-destructive">Unable to load volume information at this time.</p>
+            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
           </div>
         </div>
       </section>

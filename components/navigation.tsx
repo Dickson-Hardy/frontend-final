@@ -5,9 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Menu, X, Search } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { siteConfig } from "@/config/site"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -30,27 +34,18 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-foreground hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link href="/articles" className="text-muted-foreground hover:text-primary transition-colors">
-              Articles
-            </Link>
-            <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/editorial-board" className="text-muted-foreground hover:text-primary transition-colors">
-              Editorial Board
-            </Link>
-            <Link href="/masthead" className="text-muted-foreground hover:text-primary transition-colors">
-              Masthead
-            </Link>
-            <Link href="/guidelines" className="text-muted-foreground hover:text-primary transition-colors">
-              Guidelines
-            </Link>
-            <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-              Contact
-            </Link>
+            {siteConfig.mainNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  pathname === item.href ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                {item.title}
+              </Link>
+            ))}
           </div>
 
           {/* Search and Auth */}
@@ -79,27 +74,21 @@ export function Navigation() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link href="/" className="block px-3 py-2 text-foreground hover:text-primary">
-                Home
-              </Link>
-              <Link href="/articles" className="block px-3 py-2 text-muted-foreground hover:text-primary">
-                Articles
-              </Link>
-              <Link href="/about" className="block px-3 py-2 text-muted-foreground hover:text-primary">
-                About
-              </Link>
-              <Link href="/editorial-board" className="block px-3 py-2 text-muted-foreground hover:text-primary">
-                Editorial Board
-              </Link>
-              <Link href="/masthead" className="block px-3 py-2 text-muted-foreground hover:text-primary">
-                Masthead
-              </Link>
-              <Link href="/guidelines" className="block px-3 py-2 text-muted-foreground hover:text-primary">
-                Guidelines
-              </Link>
-              <Link href="/contact" className="block px-3 py-2 text-muted-foreground hover:text-primary">
-                Contact
-              </Link>
+              {siteConfig.mainNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                    pathname === item.href
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.title}
+                </Link>
+              ))}
               <div className="border-t border-border pt-2 mt-2">
                 <Link href="/auth/login" className="block px-3 py-2 text-muted-foreground hover:text-primary">
                   Login

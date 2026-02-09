@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { volumeService } from "@/lib/api"
+import { useApi } from "@/hooks/use-api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FolderOpen, Plus, Edit, Trash2, Eye, Calendar, AlertCircle, Loader2, Search } from "lucide-react"
-import { useApi } from "@/hooks/use-api"
 import { useAuth } from "@/components/auth/auth-provider"
 import { canAccessDashboard } from "@/lib/auth"
 import { toast } from "@/hooks/use-toast"
@@ -17,7 +18,7 @@ interface VolumeIssue {
   volumeId: string
   issueNumber: string
   title: string
-  status: 'planned' | 'in_progress' | 'published' | 'archived'
+  status: 'draft' | 'in_progress' | 'published' | 'archived'
   publicationDate?: string
   articleCount: number
   editor: string
@@ -44,55 +45,46 @@ export default function VolumeIssuesPage() {
     )
   }
 
-  // Mock data - in real app, this would come from API
-  const [issues, setIssues] = useState<VolumeIssue[]>([
-    {
-      id: "issue-1",
-      volumeId: "vol-15",
-      issueNumber: "1",
-      title: "Advances in Medical Technology",
-      status: "published",
-      publicationDate: "2024-01-15",
-      articleCount: 8,
-      editor: "Dr. Sarah Johnson",
-      specialIssue: false
-    },
-    {
-      id: "issue-2",
-      volumeId: "vol-15",
-      issueNumber: "2",
-      title: "Cardiovascular Research",
-      status: "in_progress",
-      publicationDate: "2024-04-15",
-      articleCount: 5,
-      editor: "Dr. Michael Chen",
-      specialIssue: true,
-      specialTheme: "COVID-19 Research"
-    },
-    {
-      id: "issue-3",
-      volumeId: "vol-15",
-      issueNumber: "3",
-      title: "Global Health Initiatives",
-      status: "planned",
-      publicationDate: "2024-07-15",
-      articleCount: 0,
-      editor: "Dr. Emily Rodriguez",
-      specialIssue: false
-    },
-    {
-      id: "issue-4",
-      volumeId: "vol-16",
-      issueNumber: "1",
-      title: "Digital Health Solutions",
-      status: "planned",
-      publicationDate: "2024-10-15",
-      articleCount: 0,
-      editor: "Dr. David Kim",
-      specialIssue: true,
-      specialTheme: "AI in Healthcare"
+  const [issues, setIssues] = useState<VolumeIssue[]>([])
+  const { data: volumesData, isLoading: volumesLoading } = useApi('/volumes')
+
+  useEffect(() => {
+    if (volumesData) {
+      fetchIssues()
     }
-  ])
+  }, [volumesData])
+
+  const fetchIssues = () => {
+    setIsLoading(true)
+    try {
+      const volumes = Array.isArray(volumesData) ? volumesData : []
+      
+      // Transform volumes to issues format
+      const transformedIssues = volumes.map((vol: any) => ({
+        id: vol._id,
+        volumeId: `vol-${vol.volume}`,
+        issueNumber: vol.issue?.toString() || '1',
+        title: vol.title,
+        status: vol.status,
+        publicationDate: vol.publishDate,
+        articleCount: vol.articles?.length || 0,
+        editor: vol.editor ? `${vol.editor.firstName} ${vol.editor.lastName}` : 'Unassigned',
+        specialIssue: vol.featured || false,
+        specialTheme: vol.description
+      }))
+      
+      setIssues(transformedIssues)
+    } catch (error) {
+      console.error('Failed to fetch issues:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load issues.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const getStatusColor = (status: VolumeIssue['status']) => {
     switch (status) {
@@ -100,7 +92,7 @@ export default function VolumeIssuesPage() {
         return 'bg-green-100 text-green-800'
       case 'in_progress':
         return 'bg-blue-100 text-blue-800'
-      case 'planned':
+      case 'draft':
         return 'bg-yellow-100 text-yellow-800'
       case 'archived':
         return 'bg-gray-100 text-gray-800'
@@ -119,8 +111,7 @@ export default function VolumeIssuesPage() {
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await volumeService.updateStatus(issueId, newStatus)
       
       setIssues(prev => 
         prev.map(issue => 
@@ -145,16 +136,27 @@ export default function VolumeIssuesPage() {
     }
   }
 
-  const handleDeleteIssue = (issueId: string) => {
-    setIssues(prev => prev.filter(issue => issue.id !== issueId))
-    toast({
-      title: "Issue Deleted",
-      description: "The issue has been deleted successfully."
-    })
+  const handleDeleteIssue = async (issueId: string) => {
+    if (!confirm('Are you sure you want to delete this issue?')) return
+    
+    try {
+      await volumeService.delete(issueId)
+      setIssues(prev => prev.filter(issue => issue.id !== issueId))
+      toast({
+        title: "Issue Deleted",
+        description: "The issue has been deleted successfully."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete issue.",
+        variant: "destructive"
+      })
+    }
   }
 
   const getStatusOptions = (currentStatus: VolumeIssue['status']) => {
-    const allStatuses: VolumeIssue['status'][] = ['planned', 'in_progress', 'published', 'archived']
+    const allStatuses: VolumeIssue['status'][] = ['draft', 'in_progress', 'published', 'archived']
     return allStatuses.filter(status => status !== currentStatus)
   }
 
@@ -191,7 +193,7 @@ export default function VolumeIssuesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="planned">Planned</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="archived">Archived</SelectItem>
@@ -325,9 +327,9 @@ export default function VolumeIssuesPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-yellow-600">
-                {issues.filter(i => i.status === 'planned').length}
+                {issues.filter(i => i.status === 'draft').length}
               </div>
-              <p className="text-sm text-muted-foreground">Planned</p>
+              <p className="text-sm text-muted-foreground">Draft</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">

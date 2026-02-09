@@ -36,7 +36,7 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
     specialIssueTheme: "",
     keywords: [] as string[],
     newKeyword: "",
-    hasIssues: true, // New field to track if volume has issues
+    hasIssues: false, // New field to track if volume has issues
   })
 
   const { data: existingVolumesData } = useApi('/volumes')
@@ -148,11 +148,12 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
   const isFormValid = () => {
     const baseValidation = (
       formData.volumeNumber &&
-      formData.title
+      formData.title &&
+      formData.year
     )
     
     // If volume has issues, issue number is required
-    const issueValidation = !formData.hasIssues || formData.issueNumber
+    const issueValidation = !formData.hasIssues || (formData.hasIssues && formData.issueNumber)
     
     return baseValidation && issueValidation
   }
@@ -194,17 +195,28 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
                 required
               />
             </div>
-            <div>
+            <div className="md:col-span-3">
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="hasIssues"
                   checked={formData.hasIssues}
-                  onChange={(e) => handleInputChange('hasIssues', e.target.checked)}
+                  onChange={(e) => {
+                    handleInputChange('hasIssues', e.target.checked)
+                    // Clear issue number when unchecked
+                    if (!e.target.checked) {
+                      handleInputChange('issueNumber', '')
+                    }
+                  }}
                   className="rounded"
                 />
-                <Label htmlFor="hasIssues">This volume has issues</Label>
+                <Label htmlFor="hasIssues" className="cursor-pointer">
+                  This volume has issues
+                </Label>
               </div>
+              <p className="text-xs text-muted-foreground mt-1 ml-6">
+                Uncheck if this volume contains articles directly without issue numbers
+              </p>
             </div>
           </div>
 
@@ -217,8 +229,10 @@ export function VolumeCreationForm({ onSuccess, onCancel }: VolumeCreationFormPr
                 value={formData.issueNumber}
                 onChange={(e) => handleInputChange('issueNumber', e.target.value)}
                 placeholder="e.g., 3"
-                required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Required when volume has issues
+              </p>
             </div>
           )}
 

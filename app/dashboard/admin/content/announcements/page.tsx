@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { announcementService } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -53,42 +54,14 @@ export default function AnnouncementsPage() {
     )
   }
 
-  // Mock data - in real app, this would come from API
-  const [announcements, setAnnouncements] = useState<Announcement[]>([
-    {
-      id: "ann-1",
-      title: "System Maintenance Scheduled",
-      content: "We will be performing scheduled maintenance on our servers this weekend. The system will be unavailable from 2 AM to 6 AM EST on Sunday.",
-      type: "maintenance",
-      status: "published",
-      priority: "high",
-      createdAt: "2024-01-15T10:00:00Z",
-      publishedAt: "2024-01-15T10:00:00Z",
-      expiresAt: "2024-01-22T10:00:00Z",
-      author: "System Admin"
-    },
-    {
-      id: "ann-2",
-      title: "New Submission Guidelines",
-      content: "Please review the updated submission guidelines before submitting your articles. Key changes include new formatting requirements and updated review criteria.",
-      type: "update",
-      status: "published",
-      priority: "medium",
-      createdAt: "2024-01-10T14:30:00Z",
-      publishedAt: "2024-01-10T14:30:00Z",
-      author: "Editorial Team"
-    },
-    {
-      id: "ann-3",
-      title: "Holiday Schedule Notice",
-      content: "The editorial office will be closed during the holiday period from December 24th to January 2nd. Submissions will be processed after our return.",
-      type: "general",
-      status: "draft",
-      priority: "low",
-      createdAt: "2024-01-05T09:00:00Z",
-      author: "Admin"
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const { data: announcementsData, isLoading: loadingAnnouncements } = useApi('/announcements')
+
+  useEffect(() => {
+    if (announcementsData) {
+      setAnnouncements(Array.isArray(announcementsData) ? announcementsData : [])
     }
-  ])
+  }, [announcementsData])
 
   const getTypeColor = (type: Announcement['type']) => {
     switch (type) {
@@ -138,19 +111,15 @@ export default function AnnouncementsPage() {
     setIsCreating(true)
 
     try {
-      const newAnnouncement: Announcement = {
-        id: `ann-${Date.now()}`,
+      const response = await announcementService.create({
         title: formData.title,
         content: formData.content,
         type: formData.type,
         priority: formData.priority,
-        status: 'draft',
-        createdAt: new Date().toISOString(),
-        author: user ? `${user.firstName} ${user.lastName}` : 'Admin',
         expiresAt: formData.expiresAt || undefined
-      }
+      })
 
-      setAnnouncements(prev => [newAnnouncement, ...prev])
+      setAnnouncements(prev => [response.data, ...prev])
       
       // Reset form
       setFormData({
@@ -177,34 +146,54 @@ export default function AnnouncementsPage() {
     }
   }
 
-  const handlePublish = (id: string) => {
-    setAnnouncements(prev => 
-      prev.map(ann => 
-        ann.id === id 
-          ? { ...ann, status: 'published' as const, publishedAt: new Date().toISOString() }
-          : ann
+  const handlePublish = async (id: string) => {
+    try {
+      await announcementService.update(id, { status: 'published' })
+      
+      setAnnouncements(prev => 
+        prev.map(ann => 
+          ann.id === id 
+            ? { ...ann, status: 'published' as const, publishedAt: new Date().toISOString() }
+            : ann
+        )
       )
-    )
-    
-    toast({
-      title: "Announcement Published",
-      description: "The announcement has been published successfully."
-    })
+      
+      toast({
+        title: "Announcement Published",
+        description: "The announcement has been published successfully."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to publish announcement.",
+        variant: "destructive"
+      })
+    }
   }
 
-  const handleArchive = (id: string) => {
-    setAnnouncements(prev => 
-      prev.map(ann => 
-        ann.id === id 
-          ? { ...ann, status: 'archived' as const }
-          : ann
+  const handleArchive = async (id: string) => {
+    try {
+      await announcementService.update(id, { status: 'archived' })
+      
+      setAnnouncements(prev => 
+        prev.map(ann => 
+          ann.id === id 
+            ? { ...ann, status: 'archived' as const }
+            : ann
+        )
       )
-    )
-    
-    toast({
-      title: "Announcement Archived",
-      description: "The announcement has been archived."
-    })
+      
+      toast({
+        title: "Announcement Archived",
+        description: "The announcement has been archived."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to archive announcement.",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -212,8 +201,7 @@ export default function AnnouncementsPage() {
     
     setDeletingId(id)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await announcementService.delete(id)
       setAnnouncements(prev => prev.filter(ann => ann.id !== id))
       
       toast({

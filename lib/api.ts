@@ -236,6 +236,13 @@ export const uploadService = {
       headers: { "Content-Type": "multipart/form-data" },
     })
   },
+  extractMetadata: (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    return api.post("/upload/extract-metadata", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  },
 }
 
 export const authService = {

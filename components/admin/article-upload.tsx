@@ -9,8 +9,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2, Plus, Minus } from "lucide-react"
+import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2, Plus, Minus, Sparkles } from "lucide-react"
 import { useApi } from "@/hooks/use-api"
+import { uploadService } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 interface ArticleUploadProps {
   volumeId?: string
@@ -19,6 +21,7 @@ interface ArticleUploadProps {
 
 export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const [isExtracting, setIsExtracting] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [formData, setFormData] = useState({
@@ -35,6 +38,7 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
   })
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { toast } = useToast()
 
   const { data: categories } = useApi('/articles/categories')
   const { data: volumes } = useApi('/volumes')
@@ -110,6 +114,65 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
 
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleExtractMetadata = async () => {
+    if (uploadedFiles.length === 0) {
+      toast({
+        title: "No file uploaded",
+        description: "Please upload a file first before extracting metadata",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsExtracting(true)
+    try {
+      const response = await uploadService.extractMetadata(uploadedFiles[0])
+      const result = response.data
+
+      if (result.success && result.extracted) {
+        const extracted = result.extracted
+
+        // Populate form with extracted data
+        setFormData(prev => ({
+          ...prev,
+          title: extracted.title || prev.title,
+          abstract: extracted.abstract || prev.abstract,
+          keywords: extracted.keywords?.join(', ') || prev.keywords,
+          correspondingAuthor: extracted.email || prev.correspondingAuthor,
+          authors: extracted.authors && extracted.authors.length > 0 
+            ? extracted.authors.map((author: any) => ({
+                title: author.title || "",
+                firstName: author.firstName || "",
+                lastName: author.lastName || "",
+                email: author.email || "",
+                affiliation: author.affiliation || "",
+              }))
+            : prev.authors,
+        }))
+
+        toast({
+          title: "Metadata extracted successfully",
+          description: "Form fields have been populated with extracted data. Please review and edit as needed.",
+        })
+      } else {
+        toast({
+          title: "Extraction completed with warnings",
+          description: result.message || "Some metadata could not be extracted. Please fill in the details manually.",
+          variant: "default",
+        })
+      }
+    } catch (error: any) {
+      console.error('Error extracting metadata:', error)
+      toast({
+        title: "Extraction failed",
+        description: error.response?.data?.message || "Failed to extract metadata. Please fill in the details manually.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsExtracting(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -476,7 +539,29 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
             {/* Uploaded Files */}
             {uploadedFiles.length > 0 && (
               <div className="space-y-2">
-                <Label>Uploaded Files</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Uploaded Files</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExtractMetadata}
+                    disabled={isExtracting}
+                    className="gap-2"
+                  >
+                    {isExtracting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Extract Metadata
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <div className="space-y-2">
                   {uploadedFiles.map((file, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">

@@ -108,7 +108,7 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="flex items-center space-x-3 text-sm">
             <Mail className="w-4 h-4 text-primary-foreground/60" />
-            <span className="text-primary-foreground/80">editor@amhsj.org</span>
+            <span className="text-primary-foreground/80">editor@AMHSJ.org</span>
           </div>
           {/* <div className="flex items-center space-x-3 text-sm">
             <Phone className="w-4 h-4 text-primary-foreground/60" />
@@ -124,7 +124,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-primary-foreground/60">
-          <p>© 2025 Advances in Medicine & Health Sciences Journal. All rights reserved.</p>
+          <p>© 2025 Advances in Medicine and Health Sciences Journal. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             {siteConfig.footerNav.legal.map((item) => (
               <Link
@@ -141,3 +141,6 @@ export function Footer() {
     </footer>
   )
 }
+
+
+

@@ -60,7 +60,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground leading-relaxed">
-                Advances in Medicine and Health Sciences Research (AMHSJ) is an international, peer-reviewed, 
+                Advances in Medicine and Health Sciences Journal (AMHSJ) is an international, peer-reviewed, 
                 open-access journal committed to the advancement and dissemination of scholarly knowledge across 
                 the expansive field of medicine and health sciences.
               </p>
@@ -319,7 +319,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground leading-relaxed">
-                Advances in Medicine and Health Sciences Research (AMHSJ) operates under a fully open-access 
+                Advances in Medicine and Health Sciences Journal (AMHSJ) operates under a fully open-access 
                 publishing model, ensuring that all published articles are immediately and permanently available 
                 online without any subscription or access fees. This policy aligns with our mission to democratize 
                 scientific knowledge and facilitate unrestricted global access to current research in medicine and health sciences.
@@ -463,7 +463,7 @@ export default function AboutPage() {
         <section className="text-center py-12 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg">
           <h3 className="text-2xl font-bold text-foreground mb-4">Ready to Submit Your Research?</h3>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Join the global community of researchers contributing to advances in medicine and health sciences. 
+            Join the global community of researchers contributing to advances in medicine and health. 
             Submit your original research, reviews, or case studies to AMHSJ.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -485,3 +485,5 @@ export default function AboutPage() {
     </div>
   )
 }
+
+

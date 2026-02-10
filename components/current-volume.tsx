@@ -248,7 +248,7 @@ export function CurrentVolume() {
                   <div className="text-center p-4 bg-background rounded-lg border border-border/50">
                     <div className="w-6 h-6 text-primary mx-auto mb-2 text-sm font-bold">DOI</div>
                     <div className="text-xs font-mono truncate">
-                      10.1234/amhsj.{currentVolume.year}.{currentVolume.volume}
+                      10.1234/AMHSJ.{currentVolume.year}.{currentVolume.volume}
                     </div>
                     <div className="text-xs text-muted-foreground">Identifier</div>
                   </div>
@@ -330,7 +330,7 @@ export function CurrentVolume() {
                       </div>
                     </div>
                     <div className="text-xs font-mono text-muted-foreground truncate">
-                      DOI: 10.1234/amhsj.{volume.year}.{volume.volume}
+                      DOI: 10.1234/AMHSJ.{volume.year}.{volume.volume}
                     </div>
                     <div className="flex gap-2">
                       <Button 
@@ -377,3 +377,6 @@ export function CurrentVolume() {
     </section>
   )
 }
+
+
+

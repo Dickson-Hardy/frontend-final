@@ -47,7 +47,7 @@ export function JournalInfo() {
                 International Peer-Reviewed Research Excellence
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed text-pretty">
-                Advances in Medicine & Health Sciences publishes international peer-reviewed research by volumes 
+                Advances in Medicine and Health publishes international peer-reviewed research by volumes 
                 across all medical specialties and science, advancing healthcare knowledge and innovation worldwide.
               </p>
             </div>
@@ -110,3 +110,6 @@ export function JournalInfo() {
     </section>
   )
 }
+
+
+

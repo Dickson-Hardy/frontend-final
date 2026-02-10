@@ -128,8 +128,11 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
 
     setIsExtracting(true)
     try {
+      console.log('📤 Sending file for extraction:', uploadedFiles[0].name)
       const response = await uploadService.extractMetadata(uploadedFiles[0])
       const result = response.data
+      
+      console.log('📥 Extraction response:', result)
 
       if (result.success && result.extracted) {
         const extracted = result.extracted
@@ -162,12 +165,18 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
           description: result.message || "Some metadata could not be extracted. Please fill in the details manually.",
           variant: "default",
         })
+        
+        // Log the error details for debugging
+        if (result.error) {
+          console.error('Extraction error details:', result.error)
+        }
       }
     } catch (error: any) {
-      console.error('Error extracting metadata:', error)
+      console.error('❌ Error extracting metadata:', error)
+      console.error('❌ Response data:', error.response?.data)
       toast({
         title: "Extraction failed",
-        description: error.response?.data?.message || "Failed to extract metadata. Please fill in the details manually.",
+        description: error.response?.data?.message || error.message || "Failed to extract metadata. Please fill in the details manually.",
         variant: "destructive",
       })
     } finally {

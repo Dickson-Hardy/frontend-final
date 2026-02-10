@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "AMHSJ",
-  description: "Advances in Medical & Health Sciences Journal",
+  description: "Advances in Medicine and Health Sciences Journal",
   mainNav: [
     {
       title: "Home",
@@ -53,8 +53,10 @@ export const siteConfig = {
     ]
   },
   links: {
-    twitter: "https://twitter.com/amhsj",
-    linkedin: "https://linkedin.com/company/amhsj",
-    facebook: "https://facebook.com/amhsj",
+    twitter: "https://twitter.com/AMHSJ",
+    linkedin: "https://linkedin.com/company/AMHSJ",
+    facebook: "https://facebook.com/AMHSJ",
   },
 }
+
+

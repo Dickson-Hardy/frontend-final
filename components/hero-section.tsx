@@ -32,8 +32,8 @@ export function HeroSection() {
                 Peer-Reviewed Excellence
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight text-balance">
-                Advances in Medicine
-                <span className="text-primary block">& Health Sciences</span>
+                Advances in Medicine and
+                <span className="text-primary block">Health Sciences Journal</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
                 International peer-reviewed research published by volumes across all medical specialties and science.

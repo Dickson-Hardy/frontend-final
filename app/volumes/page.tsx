@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, FileText, Download, Eye, Users, Building, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useApi } from "@/hooks/use-api"
 import { Volume, Article } from "@/lib/api"
 
 export default function VolumesPage() {
   const { data: volumes, isLoading, error } = useApi('/volumes')
+  const router = useRouter()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -89,7 +91,12 @@ export default function VolumesPage() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                    <Button variant="outline" size="sm" className="gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-2"
+                      onClick={() => router.push(`/vol/${volume.volume}`)}
+                    >
                       <Eye className="h-4 w-4" />
                       View Volume
                     </Button>
@@ -121,7 +128,16 @@ export default function VolumesPage() {
                           {typeof article === 'object' && article.articleNumber && (
                             <span className="text-xs text-muted-foreground">Article {article.articleNumber}</span>
                           )}
-                          <Button variant="outline" size="sm" className="gap-1">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-1"
+                            onClick={() => {
+                              if (typeof article === 'object' && article.articleNumber) {
+                                router.push(`/vol/${volume.volume}/article${article.articleNumber}`)
+                              }
+                            }}
+                          >
                             <Eye className="h-3 w-3" />
                             View
                           </Button>

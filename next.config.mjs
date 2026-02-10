@@ -72,7 +72,7 @@ const nextConfig = {
   
   // Production optimizations
   ...(process.env.NODE_ENV === 'production' && {
-    output: 'standalone',
+    // output: 'standalone', // Disabled due to Windows symlink permission issues
     poweredByHeader: false,
     compress: true,
     generateEtags: true,

@@ -46,16 +46,25 @@ export function generateArticleNumber(index: number): string {
 
 /**
  * Extract volume number from volume object
+ * Handles both populated volume objects and direct volume numbers
  */
 export function getVolumeNumber(volume: any): number {
-  return volume?.volume || volume?.number || 1
+  // If volume is a populated object with 'volume' field (from volumes collection)
+  if (volume?.volume) return volume.volume
+  // If volume is a populated object with 'number' field (alternative field name)
+  if (volume?.number) return volume.number
+  // If volume is just a number
+  if (typeof volume === 'number') return volume
+  // Default fallback
+  return 1
 }
 
 /**
  * Generate full article URL from article object
+ * If volumeNumberOverride is provided, use it instead of article.volume
  */
-export function getArticleUrl(article: any): string {
-  const volumeNumber = getVolumeNumber(article.volume)
+export function getArticleUrl(article: any, volumeNumberOverride?: number): string {
+  const volumeNumber = volumeNumberOverride || getVolumeNumber(article.volume)
   const articleNumber = article.articleNumber || generateArticleNumber(0)
   return generateArticleUrl(volumeNumber, articleNumber)
 }

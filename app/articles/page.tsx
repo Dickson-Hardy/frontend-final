@@ -267,10 +267,10 @@ export default function ArticlesPage() {
                           <Calendar className="w-3 h-3 mr-2" />
                           {formatDate(article.publishDate)}
                         </div>
-                        {article.volume?.number && (
+                        {article.volume?.volume && (
                           <div className="flex items-center text-xs text-muted-foreground">
                             <BookOpen className="w-3 h-3 mr-1" />
-                            Vol. {article.volume.number}
+                            Vol. {article.volume.volume}
                           </div>
                         )}
                       </div>

@@ -480,7 +480,7 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
                   <SelectContent>
                     {volumes?.map((volume: any) => (
                       <SelectItem key={volume.id} value={volume.id}>
-                        {volume.number} - {volume.title}
+                        Volume {volume.volume} - {volume.title}
                       </SelectItem>
                     ))}
                   </SelectContent>

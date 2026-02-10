@@ -221,7 +221,7 @@ export default function ContentUploadPage() {
                 <SelectContent>
                   {volumes.map((volume: any) => (
                     <SelectItem key={volume.id} value={volume.id}>
-                      {volume.title || volume.number} ({volume.year})
+                      {volume.title || `Volume ${volume.volume}`} ({volume.year})
                     </SelectItem>
                   ))}
                 </SelectContent>

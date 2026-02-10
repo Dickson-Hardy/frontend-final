@@ -340,7 +340,7 @@ PDF URL: ${article.manuscriptFile?.secureUrl || article.manuscriptFile?.url || "
                         
                         <CardTitle className="text-xl mb-2 leading-tight">
                           <Link 
-                            href={getArticleUrl(article)}
+                            href={getArticleUrl(article, volumeNumber)}
                             className="hover:text-primary transition-colors"
                           >
                             {article.title}
@@ -392,7 +392,7 @@ PDF URL: ${article.manuscriptFile?.secureUrl || article.manuscriptFile?.url || "
                       </div>
                       
                       <div className="flex gap-2">
-                        <Link href={getArticleUrl(article)}>
+                        <Link href={getArticleUrl(article, volumeNumber)}>
                           <Button variant="outline" size="sm">
                             <Eye className="w-3 h-3 mr-1" />
                             Read

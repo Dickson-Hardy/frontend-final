@@ -153,12 +153,34 @@ const getNavigationItems = (userRole: UserRole): NavItem[] => {
     ],
     admin: [
       {
-        title: "System Overview",
+        title: "Dashboard",
         href: "/dashboard/admin",
         icon: BarChart3,
       },
       {
-        title: "Volume Management",
+        title: "Articles",
+        href: "/dashboard/admin/articles",
+        icon: FileText,
+        children: [
+          {
+            title: "All Articles",
+            href: "/dashboard/admin/articles",
+            icon: FileText,
+          },
+          {
+            title: "Upload New",
+            href: "/dashboard/admin/articles/upload",
+            icon: Upload,
+          },
+          {
+            title: "Article Numbers",
+            href: "/dashboard/admin/articles/numbers",
+            icon: Hash,
+          },
+        ],
+      },
+      {
+        title: "Volumes & Issues",
         href: "/dashboard/admin/volumes",
         icon: Book,
         children: [
@@ -180,22 +202,12 @@ const getNavigationItems = (userRole: UserRole): NavItem[] => {
         ],
       },
       {
-        title: "Content Management",
-        href: "/dashboard/admin/content",
-        icon: Upload,
+        title: "Website Content",
+        href: "/dashboard/admin/content/news",
+        icon: Megaphone,
         children: [
           {
-            title: "Upload Articles",
-            href: "/dashboard/admin/content/upload",
-            icon: Upload,
-          },
-          {
-            title: "Assign Article Numbers",
-            href: "/dashboard/admin/content/article-numbers",
-            icon: Hash,
-          },
-          {
-            title: "Manage News",
+            title: "News & Updates",
             href: "/dashboard/admin/content/news",
             icon: Megaphone,
           },
@@ -207,12 +219,12 @@ const getNavigationItems = (userRole: UserRole): NavItem[] => {
         ],
       },
       {
-        title: "User Management",
+        title: "Users",
         href: "/dashboard/admin/users",
         icon: Users,
       },
       {
-        title: "System Settings",
+        title: "Settings",
         href: "/dashboard/admin/settings",
         icon: Settings,
       },

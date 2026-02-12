@@ -103,9 +103,9 @@ export default function AdminVolumesPage() {
           <p className="text-muted-foreground mt-2">Manage journal volumes and issues</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => setActiveTab("upload")}>
-            <Upload className="h-4 w-4" />
-            Upload Article
+          <Button variant="outline" className="gap-2" onClick={() => setActiveTab("assign")}>
+            <FileText className="h-4 w-4" />
+            Assign Articles
           </Button>
           <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
             <Plus className="h-4 w-4" />
@@ -129,8 +129,7 @@ export default function AdminVolumesPage() {
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
-          <TabsTrigger value="volumes">Volumes</TabsTrigger>
-          <TabsTrigger value="upload">Upload Article</TabsTrigger>
+          <TabsTrigger value="volumes">All Volumes</TabsTrigger>
           {selectedVolume && <TabsTrigger value="assign">Assign Articles</TabsTrigger>}
         </TabsList>
 
@@ -286,10 +285,6 @@ export default function AdminVolumesPage() {
               ))
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="upload" className="space-y-6">
-          <ArticleUpload onUploadComplete={() => refetchVolumes()} />
         </TabsContent>
 
         <TabsContent value="assign" className="space-y-6">

@@ -7,17 +7,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Edit, Trash2, FileText, User, Calendar, Eye, Loader2, Download } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Search, Edit, Trash2, FileText, User, Calendar, Eye, Loader2, Download, Upload, Hash, Plus } from "lucide-react"
 import { format } from "date-fns"
 import { useApi } from "@/hooks/use-api"
 import { adminArticleService } from "@/lib/api"
 import { ArticleEditDialog } from "@/components/admin/article-edit-dialog"
+import { ArticleUpload } from "@/components/admin/article-upload"
+import { ArticleNumberAssignment } from "@/components/admin/article-number-assignment"
 import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/components/auth/auth-provider"
 import { canAccessDashboard } from "@/lib/auth"
 
 export default function AdminArticlesPage() {
   const { user } = useAuth()
+  const [activeTab, setActiveTab] = useState("list")
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null)
@@ -95,18 +99,56 @@ export default function AdminArticlesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Article Management</h1>
-        <p className="text-muted-foreground mt-2">View and edit all articles in the system</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Article Management</h1>
+          <p className="text-muted-foreground mt-2">Complete article lifecycle management</p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant={activeTab === "upload" ? "default" : "outline"} 
+            className="gap-2"
+            onClick={() => setActiveTab("upload")}
+          >
+            <Upload className="h-4 w-4" />
+            Upload New
+          </Button>
+          <Button 
+            variant={activeTab === "numbers" ? "default" : "outline"}
+            className="gap-2"
+            onClick={() => setActiveTab("numbers")}
+          >
+            <Hash className="h-4 w-4" />
+            Article Numbers
+          </Button>
+        </div>
       </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="list" className="gap-2">
+            <FileText className="h-4 w-4" />
+            All Articles
+          </TabsTrigger>
+          <TabsTrigger value="upload" className="gap-2">
+            <Upload className="h-4 w-4" />
+            Upload New
+          </TabsTrigger>
+          <TabsTrigger value="numbers" className="gap-2">
+            <Hash className="h-4 w-4" />
+            Article Numbers
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list" className="space-y-6"
 
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Label htmlFor="search">Search Articles</Label>
-              <div className="relative">
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
+            <div className="flex-1 w-full">
+              <Label htmlFor="search" className="text-sm font-medium">Search Articles</Label>
+              <div className="relative mt-1.5">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
@@ -117,10 +159,10 @@ export default function AdminArticlesPage() {
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="status-filter">Filter by Status</Label>
+            <div className="w-full md:w-64">
+              <Label htmlFor="status-filter" className="text-sm font-medium">Filter by Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,36 +181,30 @@ export default function AdminArticlesPage() {
         </CardContent>
       </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="border-l-4 border-l-green-500">
           <CardHeader className="pb-3">
-            <CardDescription>Total Articles</CardDescription>
-            <CardTitle className="text-3xl">{articlesData?.length || 0}</CardTitle>
+            <CardDescription className="text-xs">Published</CardDescription>
+            <CardTitle className="text-2xl">{articlesData?.filter((a: any) => a.status === 'published').length || 0}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="pb-3">
-            <CardDescription>Published</CardDescription>
-            <CardTitle className="text-3xl">
-              {articlesData?.filter((a: any) => a.status === 'published').length || 0}
-            </CardTitle>
+            <CardDescription className="text-xs">Under Review</CardDescription>
+            <CardTitle className="text-2xl">{articlesData?.filter((a: any) => a.status === 'under_review').length || 0}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-yellow-500">
           <CardHeader className="pb-3">
-            <CardDescription>Under Review</CardDescription>
-            <CardTitle className="text-3xl">
-              {articlesData?.filter((a: any) => a.status === 'under_review').length || 0}
-            </CardTitle>
+            <CardDescription className="text-xs">Submitted</CardDescription>
+            <CardTitle className="text-2xl">{articlesData?.filter((a: any) => a.status === 'submitted').length || 0}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-orange-500">
           <CardHeader className="pb-3">
-            <CardDescription>Submitted</CardDescription>
-            <CardTitle className="text-3xl">
-              {articlesData?.filter((a: any) => a.status === 'submitted').length || 0}
-            </CardTitle>
+            <CardDescription className="text-xs">Revision Needed</CardDescription>
+            <CardTitle className="text-2xl">{articlesData?.filter((a: any) => a.status === 'revision_requested').length || 0}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -176,100 +212,131 @@ export default function AdminArticlesPage() {
       {/* Articles List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Articles</CardTitle>
-          <CardDescription>
-            Showing {articles.length} of {articlesData?.length || 0} articles
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>All Articles</CardTitle>
+              <CardDescription>
+                Showing {articles.length} of {articlesData?.length || 0} articles
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+                <p className="text-muted-foreground">Loading articles...</p>
+              </div>
             </div>
           ) : articles.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No articles found</p>
+            <div className="text-center py-12">
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No articles found</h3>
+              <p className="text-muted-foreground">Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {articles.map((article: any) => (
-                <div key={article._id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold">{article.title}</h3>
-                        <Badge className={getStatusColor(article.status)}>
-                          {article.status?.replace("_", " ")}
-                        </Badge>
-                        {article.featured && (
-                          <Badge variant="outline" className="bg-yellow-50">Featured</Badge>
-                        )}
+                <div key={article._id} className="border rounded-lg p-4 hover:border-primary/50 transition-colors bg-card">
+                  <div className="flex items-start gap-4">
+                    {/* Left Section - Main Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-3 mb-2">
+                        <h3 className="text-base font-semibold flex-1 line-clamp-2">{article.title}</h3>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Badge className={getStatusColor(article.status)}>
+                            {article.status?.replace("_", " ")}
+                          </Badge>
+                          {article.featured && (
+                            <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
+                              Featured
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                         {article.abstract}
                       </p>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium text-muted-foreground">Authors:</span>
-                          <p className="text-foreground">
+                      {/* Metadata Grid */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-muted-foreground truncate">
                             {Array.isArray(article.authors) && article.authors.length > 0
-                              ? article.authors.map((a: any) => `${a.firstName} ${a.lastName}`).join(', ')
-                              : 'N/A'}
-                          </p>
+                              ? article.authors.length === 1
+                                ? `${article.authors[0].firstName} ${article.authors[0].lastName}`
+                                : `${article.authors[0].firstName} ${article.authors[0].lastName} +${article.authors.length - 1}`
+                              : 'No authors'}
+                          </span>
                         </div>
-                        <div>
-                          <span className="font-medium text-muted-foreground">Submitted:</span>
-                          <p className="text-foreground">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-muted-foreground">
                             {article.submissionDate 
                               ? format(new Date(article.submissionDate), 'MMM d, yyyy')
                               : 'N/A'}
-                          </p>
+                          </span>
                         </div>
-                        <div>
-                          <span className="font-medium text-muted-foreground">Article #:</span>
-                          <p className="text-foreground">{article.articleNumber || 'Not set'}</p>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-muted-foreground">
+                            #{article.articleNumber || 'Not set'}
+                          </span>
                         </div>
-                        <div>
-                          <span className="font-medium text-muted-foreground">Views:</span>
-                          <p className="text-foreground">{article.viewCount || 0}</p>
+                        <div className="flex items-center gap-2">
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-muted-foreground">
+                            {article.viewCount || 0} views
+                          </span>
                         </div>
                       </div>
 
-                      {/* File Info */}
-                      {article.manuscriptFile && (
-                        <div className="mt-3 flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Manuscript:</span>
-                            <Badge variant="outline" className="uppercase">
-                              {article.manuscriptFile.format || 'Unknown'}
-                            </Badge>
-                            <span className="text-muted-foreground">
-                              {formatFileSize(article.manuscriptFile.bytes)}
-                            </span>
-                          </div>
+                      {/* Files Info */}
+                      {(article.manuscriptFile || article.supplementaryFiles?.length > 0) && (
+                        <div className="flex items-center gap-4 mt-3 pt-3 border-t text-xs">
+                          {article.manuscriptFile && (
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <FileText className="h-3.5 w-3.5" />
+                              <span className="uppercase font-medium">{article.manuscriptFile.format || 'PDF'}</span>
+                              <span>•</span>
+                              <span>{formatFileSize(article.manuscriptFile.bytes)}</span>
+                            </div>
+                          )}
                           {article.supplementaryFiles?.length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">
-                                + {article.supplementaryFiles.length} supplementary file(s)
-                              </span>
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Download className="h-3.5 w-3.5" />
+                              <span>+{article.supplementaryFiles.length} supplementary</span>
                             </div>
                           )}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
+                    {/* Right Section - Actions */}
+        </TabsContent>
+
+        <TabsContent value="upload" className="space-y-6">
+          <ArticleUpload onUploadComplete={() => {
+            refetch()
+            toast({ title: "Article uploaded successfully" })
+          }} />
+        </TabsContent>
+
+        <TabsContent value="numbers" className="space-y-6">
+          <ArticleNumberAssignment onClose={() => setActiveTab("list")} />
+        </TabsContent>
+      </Tabs>
+                    <div className="flex flex-col gap-2 flex-shrink-0">
                       <Button
-                        variant="outline"
+                        variant="default"
                         size="sm"
                         onClick={() => setEditingArticleId(article._id)}
-                        className="gap-2"
+                        className="gap-2 min-w-[90px]"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5" />
                         Edit
                       </Button>
                       <Button
@@ -277,12 +344,12 @@ export default function AdminArticlesPage() {
                         size="sm"
                         onClick={() => handleDelete(article._id)}
                         disabled={deletingArticleId === article._id}
-                        className="gap-2 text-red-600 hover:text-red-700"
+                        className="gap-2 min-w-[90px] hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
                       >
                         {deletingArticleId === article._id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         )}
                         Delete
                       </Button>

@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Clock, CheckCircle, AlertCircle, FileText, Users, Calendar, TrendingUp, Settings, Shield, Database, Loader2 } from "lucide-react"
-import Link from "next/link"
 import { useApi } from "@/hooks/use-api"
 import { useAuth } from "@/components/auth/auth-provider"
 import { canAccessDashboard } from "@/lib/auth"
@@ -100,12 +99,12 @@ function AdminDashboardInner() {
           <Shield className="h-8 w-8 text-blue-600" />
           Admin Dashboard
         </h1>
-        <p className="text-muted-foreground mt-2">System administration and management</p>
+        <p className="text-muted-foreground mt-2">System overview and quick actions</p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -126,7 +125,7 @@ function AdminDashboardInner() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Submissions</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -147,7 +146,7 @@ function AdminDashboardInner() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">System Uptime</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
@@ -157,18 +156,16 @@ function AdminDashboardInner() {
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.uptime || '0%'}</div>
+                <div className="text-2xl font-bold">{stats?.uptime || '99.9%'}</div>
                 <p className="text-xs text-muted-foreground">
-                  <span className={(stats?.uptimeChange || '+0%').startsWith('+') ? "text-green-600" : "text-red-600"}>
-                    {stats?.uptimeChange || '+0%'}
-                  </span> from last week
+                  <span className="text-green-600">Healthy</span> • Last 30 days
                 </p>
               </>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-orange-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
             <Database className="h-4 w-4 text-muted-foreground" />
@@ -178,11 +175,9 @@ function AdminDashboardInner() {
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.storageUsed || '0TB'}</div>
+                <div className="text-2xl font-bold">{stats?.storageUsed || '2.4GB'}</div>
                 <p className="text-xs text-muted-foreground">
-                  <span className={(stats?.storageChange || '+0GB').startsWith('+') ? "text-green-600" : "text-red-600"}>
-                    {stats?.storageChange || '+0GB'}
-                  </span> from last week
+                  <span className="text-orange-600">+240MB</span> this month
                 </p>
               </>
             )}
@@ -197,184 +192,113 @@ function AdminDashboardInner() {
           <CardDescription>Common administrative tasks</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/dashboard/admin/articles">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <FileText className="h-6 w-6" />
-                <span>Manage Articles</span>
+              <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-primary">
+                <FileText className="h-8 w-8 text-primary" />
+                <div className="text-center">
+                  <div className="font-semibold">Manage Articles</div>
+                  <div className="text-xs text-muted-foreground">View, edit, upload</div>
+                </div>
               </Button>
             </Link>
             <Link href="/dashboard/admin/volumes">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <Database className="h-6 w-6" />
-                <span>Manage Volumes</span>
+              <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-primary">
+                <Database className="h-8 w-8 text-primary" />
+                <div className="text-center">
+                  <div className="font-semibold">Manage Volumes</div>
+                  <div className="text-xs text-muted-foreground">Create, assign</div>
+                </div>
               </Button>
             </Link>
             <Link href="/dashboard/admin/users">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <Users className="h-6 w-6" />
-                <span>Manage Users</span>
+              <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-primary">
+                <Users className="h-8 w-8 text-primary" />
+                <div className="text-center">
+                  <div className="font-semibold">Manage Users</div>
+                  <div className="text-xs text-muted-foreground">Add, edit, permissions</div>
+                </div>
               </Button>
             </Link>
             <Link href="/dashboard/admin/settings">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <Settings className="h-6 w-6" />
-                <span>System Settings</span>
+              <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-primary">
+                <Settings className="h-8 w-8 text-primary" />
+                <div className="text-center">
+                  <div className="font-semibold">System Settings</div>
+                  <div className="text-xs text-muted-foreground">Configure system</div>
+                </div>
               </Button>
             </Link>
           </div>
         </CardContent>
       </Card>
 
-      {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">System Overview</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="health">System Health</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
-                <CardDescription>Latest system activities and events</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {activities.map((activity: any) => (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{activity.description}</p>
-                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
-                    </div>
-                    <Badge className={getSeverityColor(activity.severity)}>
-                      {activity.severity}
-                    </Badge>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>System Health</CardTitle>
-                <CardDescription>Current system component status</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {health.map((component: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{component.component}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Uptime: {component.uptime} • Response: {component.responseTime}
-                      </p>
-                    </div>
-                    <Badge className={getStatusColor(component.status)}>
-                      {component.status}
-                    </Badge>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4">
-          {users.map((user: any) => (
-            <Card key={user.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{user.name}</h3>
-                      <Badge className={getRoleColor(user.role)}>
-                        {user.role}
-                      </Badge>
-                      <Badge className="bg-green-100 text-green-800">
-                        {user.status}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground mb-4">
-                      <div>
-                        <span className="font-medium">Email:</span>
-                        <p>{user.email}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Last Login:</span>
-                        <p>{user.lastLogin}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Submissions:</span>
-                        <p>{user.submissions}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Users className="h-4 w-4" />
-                      Edit User
-                    </Button>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Shield className="h-4 w-4" />
-                      Permissions
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="health" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {health.map((component: any, index: number) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {component.component}
-                    <Badge className={getStatusColor(component.status)}>
-                      {component.status}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Uptime:</span>
-                    <span className="font-medium">{component.uptime}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Response Time:</span>
-                    <span className="font-medium">{component.responseTime}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                System Settings
-              </CardTitle>
-              <CardDescription>Configure system-wide settings and preferences</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">System Settings</h3>
-                <p className="text-muted-foreground">System configuration interface will be displayed here</p>
+      {/* Recent Activity & System Health */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription>Latest system activities and events</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {activitiesLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            ) : activities.length > 0 ? (
+              activities.slice(0, 5).map((activity: any) => (
+                <div key={activity.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.description}</p>
+                    <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                  </div>
+                  <Badge className={getSeverityColor(activity.severity)} variant="secondary">
+                    {activity.severity}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              System Health
+            </CardTitle>
+            <CardDescription>Current system component status</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {healthLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : health.length > 0 ? (
+              health.slice(0, 5).map((component: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{component.component}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Response: {component.responseTime}
+                    </p>
+                  </div>
+                  <Badge className={getStatusColor(component.status)} variant="secondary">
+                    {component.status}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">All systems operational</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

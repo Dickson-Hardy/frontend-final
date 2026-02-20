@@ -280,7 +280,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="top-0 left-0 translate-x-0 translate-y-0 inset-0 w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 gap-0 flex flex-col">
+      <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] h-[95vh] max-w-none max-h-none rounded-lg p-0 gap-0 flex flex-col shadow-2xl border bg-background">
         <DialogHeader className="px-6 py-4 border-b bg-muted/30 shrink-0">
           <DialogTitle className="text-lg">Edit Article</DialogTitle>
           <DialogDescription className="text-xs">Update article details, metadata, and files</DialogDescription>

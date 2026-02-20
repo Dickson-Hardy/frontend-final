@@ -260,7 +260,9 @@ export function ArticleUpload({ volumeId, onUploadComplete }: ArticleUploadProps
       })
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      xhr.open('POST', `${API_BASE_URL}/api/v1/articles`)
+      const normalizedUploadBase = API_BASE_URL.replace(/\/$/, '')
+      const uploadApiUrl = normalizedUploadBase.endsWith('/api/v1') ? normalizedUploadBase : `${normalizedUploadBase}/api/v1`
+      xhr.open('POST', `${uploadApiUrl}/articles`)
       xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('auth_token')}`)
       xhr.send(formDataToSend)
 

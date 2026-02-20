@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { API_URL } from "@/lib/api"
 import {
   Select,
   SelectContent,
@@ -96,7 +97,7 @@ export default function AnalyticsPage() {
   const handleExport = async () => {
     try {
       // For blob responses, use fetch directly
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/editorial/analytics/export?range=${timeRange}`, {
+      const response = await fetch(`${API_URL}/editorial/analytics/export?range=${timeRange}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

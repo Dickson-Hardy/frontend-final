@@ -6,7 +6,8 @@ import { MetadataRoute } from 'next'
  */
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://amhsj.org'
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+const _rawApiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '')
+const API_URL = _rawApiUrl.endsWith('/api/v1') ? _rawApiUrl.replace(/\/api\/v1$/, '') : _rawApiUrl
 
 interface Article {
   _id: string

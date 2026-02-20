@@ -9,6 +9,7 @@ import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Clock, CheckCircle, 
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { API_URL } from "@/lib/api"
 
 interface Submission {
   _id: string
@@ -55,7 +56,7 @@ export default function SubmissionsPage() {
         return
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles/my-articles`, {
+      const response = await fetch(`${API_URL}/articles/my-articles`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -84,7 +85,7 @@ export default function SubmissionsPage() {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions/drafts`, {
+      const response = await fetch(`${API_URL}/submissions/drafts`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -367,7 +368,7 @@ export default function SubmissionsPage() {
                             try {
                               const token = localStorage.getItem('token')
                               const response = await fetch(
-                                `${process.env.NEXT_PUBLIC_API_URL}/submissions/drafts/${draft._id}`,
+                                `${API_URL}/submissions/drafts/${draft._id}`,
                                 {
                                   method: 'DELETE',
                                   headers: {

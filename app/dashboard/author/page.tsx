@@ -1,5 +1,6 @@
 'use client'
 
+import { API_URL } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -83,12 +84,12 @@ export default function AuthorDashboard() {
       }
 
       // Fetch submissions
-      const submissionsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles/my-articles`, {
+      const submissionsRes = await fetch(`${API_URL}/articles/my-articles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
       // Fetch drafts
-      const draftsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions/drafts`, {
+      const draftsRes = await fetch(`${API_URL}/submissions/drafts`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 

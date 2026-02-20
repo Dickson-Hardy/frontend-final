@@ -2,9 +2,13 @@ import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } f
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
+// Normalize: strip trailing slash, then append /api/v1 if not already present
+const normalizedBase = API_BASE_URL.replace(/\/$/, '')
+export const API_URL = normalizedBase.endsWith('/api/v1') ? normalizedBase : `${normalizedBase}/api/v1`
+
 // Create axios instance with default config
 export const api = axios.create({
-  baseURL: `${API_BASE_URL.replace(/\/$/, '')}`,
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },

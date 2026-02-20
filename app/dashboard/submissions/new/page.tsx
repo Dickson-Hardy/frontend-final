@@ -9,6 +9,7 @@ import { ArrowLeft, FileText, Upload } from "lucide-react"
 import Link from "next/link"
 import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/components/auth/auth-provider"
+import { API_URL } from "@/lib/api"
 
 export default function NewSubmissionPage() {
   const router = useRouter()
@@ -53,7 +54,7 @@ export default function NewSubmissionPage() {
       }
 
       const token = localStorage.getItem('token')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions`, {
+      const response = await fetch(`${API_URL}/submissions`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -92,7 +93,7 @@ export default function NewSubmissionPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/drafts`, {
+      const response = await fetch(`${API_URL}/drafts`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

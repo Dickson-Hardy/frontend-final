@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Calendar, Clock, FileText, User, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { API_URL } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/components/auth/auth-provider"
 import { format } from "date-fns"
@@ -69,7 +70,7 @@ export default function ReviewPage() {
       }
 
       // Fetch review details
-      const reviewResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${reviewId}`, {
+      const reviewResponse = await fetch(`${API_URL}/reviews/${reviewId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
@@ -81,7 +82,7 @@ export default function ReviewPage() {
       setReview(reviewData)
 
       // Fetch article details
-      const articleResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles/${reviewData.articleId}`, {
+      const articleResponse = await fetch(`${API_URL}/articles/${reviewData.articleId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
@@ -106,7 +107,7 @@ export default function ReviewPage() {
     setActionLoading('accept')
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/review-workflow/reviews/${reviewId}/accept`, {
+      const response = await fetch(`${API_URL}/review-workflow/reviews/${reviewId}/accept`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -139,7 +140,7 @@ export default function ReviewPage() {
     setActionLoading('decline')
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/review-workflow/reviews/${reviewId}/decline`, {
+      const response = await fetch(`${API_URL}/review-workflow/reviews/${reviewId}/decline`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -173,7 +174,7 @@ export default function ReviewPage() {
     setIsSubmitting(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/review-workflow/reviews/${reviewId}/submit`, {
+      const response = await fetch(`${API_URL}/review-workflow/reviews/${reviewId}/submit`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

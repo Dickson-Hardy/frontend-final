@@ -13,7 +13,8 @@ export async function generateArticlePageMetadata(
   
   try {
     // Fetch article data from API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const _rawApi = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '')
+    const apiUrl = _rawApi.endsWith('/api/v1') ? _rawApi.replace(/\/api\/v1$/, '') : _rawApi
     const response = await fetch(
       `${apiUrl}/api/v1/articles/volume/${volumeNumber}/article/${articleNumber}`,
       { cache: 'no-store' }
@@ -95,7 +96,8 @@ export async function generateVolumePageMetadata(volumeNumber: number): Promise<
   
   try {
     // Fetch volume data from API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const _rawApi2 = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '')
+    const apiUrl = _rawApi2.endsWith('/api/v1') ? _rawApi2.replace(/\/api\/v1$/, '') : _rawApi2
     const response = await fetch(
       `${apiUrl}/api/v1/volumes/number/${volumeNumber}`,
       { cache: 'no-store' }

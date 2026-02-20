@@ -53,7 +53,9 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
     categories: [] as string[],
   })
   const [newKeyword, setNewKeyword] = useState("")
+  const [editingKeyword, setEditingKeyword] = useState<{ index: number; value: string } | null>(null)
   const [newCategory, setNewCategory] = useState("")
+  const [editingCategory, setEditingCategory] = useState<{ index: number; value: string } | null>(null)
   const [newAuthor, setNewAuthor] = useState<Author>({
     title: "",
     firstName: "",
@@ -64,17 +66,32 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
   const [manuscriptFile, setManuscriptFile] = useState<File | null>(null)
   const [supplementaryFiles, setSupplementaryFiles] = useState<File[]>([])
 
+  // Debug logging
+  console.log('ArticleEditDialog render:', { articleId, open, loading, article: !!article })
+
   useEffect(() => {
     if (open && articleId) {
+      console.log('Fetching article:', articleId)
       fetchArticle()
+    } else if (open && !articleId) {
+      console.error('Modal opened without articleId')
+      toast({
+        title: "Error",
+        description: "No article ID provided",
+        variant: "destructive"
+      })
+      onOpenChange(false)
     }
   }, [open, articleId])
 
   const fetchArticle = async () => {
     setLoading(true)
     try {
+      console.log('Fetching article with ID:', articleId)
       const response = await adminArticleService.getById(articleId)
+      console.log('Article response:', response)
       const data = response.data
+      console.log('Article data:', data)
       setArticle(data)
       setFormData({
         title: data.title || "",
@@ -93,9 +110,13 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
         acknowledgments: data.acknowledgments || "",
         categories: data.categories || [],
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch article:", error)
-      toast({ title: "Failed to load article", variant: "destructive" })
+      toast({ 
+        title: "Failed to load article", 
+        description: error?.response?.data?.message || error?.message || "Unknown error",
+        variant: "destructive" 
+      })
     } finally {
       setLoading(false)
     }
@@ -167,6 +188,26 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
     }))
   }
 
+  const startEditingKeyword = (index: number) => {
+    setEditingKeyword({ index, value: formData.keywords[index] })
+  }
+
+  const saveKeywordEdit = () => {
+    if (editingKeyword && editingKeyword.value.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        keywords: prev.keywords.map((k, i) => 
+          i === editingKeyword.index ? editingKeyword.value.trim() : k
+        )
+      }))
+    }
+    setEditingKeyword(null)
+  }
+
+  const cancelKeywordEdit = () => {
+    setEditingKeyword(null)
+  }
+
   const addCategory = () => {
     if (newCategory.trim() && !formData.categories.includes(newCategory.trim())) {
       setFormData(prev => ({
@@ -182,6 +223,26 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
       ...prev,
       categories: prev.categories.filter(c => c !== category)
     }))
+  }
+
+  const startEditingCategory = (index: number) => {
+    setEditingCategory({ index, value: formData.categories[index] })
+  }
+
+  const saveCategoryEdit = () => {
+    if (editingCategory && editingCategory.value.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        categories: prev.categories.map((c, i) => 
+          i === editingCategory.index ? editingCategory.value.trim() : c
+        )
+      }))
+    }
+    setEditingCategory(null)
+  }
+
+  const cancelCategoryEdit = () => {
+    setEditingCategory(null)
   }
 
   const addAuthor = () => {
@@ -219,10 +280,10 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-3xl w-full overflow-hidden p-0 flex flex-col">
-        <SheetHeader className="px-6 py-4 border-b bg-muted/30">
-          <SheetTitle className="text-2xl">Edit Article</SheetTitle>
-          <SheetDescription>Make changes to the article details, metadata, and files</SheetDescription>
+      <SheetContent side="right" className="w-full max-w-2xl overflow-hidden p-0 flex flex-col">
+        <SheetHeader className="px-4 py-3 border-b bg-muted/30">
+          <SheetTitle className="text-lg">Edit Article</SheetTitle>
+          <SheetDescription className="text-xs">Update article details, metadata, and files</SheetDescription>
         </SheetHeader>
 
         {loading ? (
@@ -232,15 +293,29 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
               <p className="text-muted-foreground">Loading article...</p>
             </div>
           </div>
+        ) : !article ? (
+          <div className="flex items-center justify-center py-12 flex-1">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+              <p className="text-muted-foreground">Failed to load article data</p>
+              <Button 
+                variant="outline" 
+                onClick={fetchArticle} 
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
         ) : (
-          <ScrollArea className="flex-1 px-6">
-            <div className="space-y-6 py-6">
+          <ScrollArea className="flex-1 px-4">
+            <div className="space-y-4 py-4">
               {/* Status and Type Quick Access */}
-              <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/30">
+              <div className="grid grid-cols-2 gap-3 p-3 border rounded-lg bg-muted/30">
                 <div>
-                  <Label htmlFor="status" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</Label>
+                  <Label htmlFor="status" className="text-xs font-medium">Status</Label>
                   <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-                    <SelectTrigger className="mt-1.5">
+                    <SelectTrigger className="mt-1 h-9">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -256,9 +331,9 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                 </div>
 
                 <div>
-                  <Label htmlFor="type" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Article Type</Label>
+                  <Label htmlFor="type" className="text-xs font-medium">Article Type</Label>
                   <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
-                    <SelectTrigger className="mt-1.5">
+                    <SelectTrigger className="mt-1 h-9">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -274,108 +349,170 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
               </div>
 
               {/* Accordion Sections */}
-              <Accordion type="multiple" defaultValue={["basic", "authors", "files", "metadata"]} className="w-full space-y-4">
+              <Accordion type="multiple" defaultValue={["basic", "authors", "files", "metadata"]} className="w-full space-y-3">
                 {/* Basic Information */}
-                <AccordionItem value="basic" className="border rounded-lg px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionItem value="basic" className="border rounded-lg px-3 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <span className="font-semibold">Basic Information</span>
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Basic Information</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="space-y-4 pb-4 pt-2">
+                  <AccordionContent className="space-y-3 pb-3 pt-2">
                     <div>
-                      <Label htmlFor="title" className="text-sm font-medium">Title *</Label>
+                      <Label htmlFor="title" className="text-xs font-medium">Title *</Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                         placeholder="Enter article title"
-                        className="mt-1.5"
+                        className="mt-1 h-9 text-sm"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="abstract" className="text-sm font-medium">Abstract *</Label>
+                      <Label htmlFor="abstract" className="text-xs font-medium">Abstract *</Label>
                       <Textarea
                         id="abstract"
                         value={formData.abstract}
                         onChange={(e) => setFormData(prev => ({ ...prev, abstract: e.target.value }))}
                         placeholder="Enter article abstract"
-                        rows={5}
-                        className="mt-1.5"
+                        rows={4}
+                        className="mt-1 text-sm"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="content" className="text-sm font-medium">Full Content</Label>
+                      <Label htmlFor="content" className="text-xs font-medium">Full Content</Label>
                       <Textarea
                         id="content"
                         value={formData.content}
                         onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                         placeholder="Enter full article content (optional)"
-                        rows={8}
-                        className="mt-1.5"
+                        rows={6}
+                        className="mt-1 text-sm"
                       />
                     </div>
 
                     <div>
-                      <Label className="text-sm font-medium">Keywords</Label>
-                      <div className="flex gap-2 mt-1.5">
+                      <Label className="text-xs font-medium">Keywords</Label>
+                      <div className="flex gap-2 mt-1">
                         <Input
                           value={newKeyword}
                           onChange={(e) => setNewKeyword(e.target.value)}
                           placeholder="Add keyword and press Enter"
                           onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword())}
+                          className="h-9 text-sm"
                         />
-                        <Button type="button" onClick={addKeyword} variant="outline" size="icon">
+                        <Button type="button" onClick={addKeyword} variant="outline" size="icon" className="h-9 w-9">
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
                       {formData.keywords.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="flex flex-wrap gap-1.5 mt-2">
                           {formData.keywords.map((keyword, i) => (
-                            <Badge key={i} variant="secondary" className="gap-1 px-3 py-1">
-                              {keyword}
-                              <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => removeKeyword(keyword)} />
-                            </Badge>
+                            editingKeyword?.index === i ? (
+                              <div key={i} className="flex gap-1">
+                                <Input
+                                  value={editingKeyword.value}
+                                  onChange={(e) => setEditingKeyword({ ...editingKeyword, value: e.target.value })}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      saveKeywordEdit()
+                                    } else if (e.key === 'Escape') {
+                                      cancelKeywordEdit()
+                                    }
+                                  }}
+                                  className="h-7 text-xs w-32"
+                                  autoFocus
+                                />
+                              </div>
+                            ) : (
+                              <Badge 
+                                key={i} 
+                                variant="secondary" 
+                                className="gap-1 px-2 py-0.5 text-xs cursor-pointer hover:bg-secondary/80"
+                                onClick={() => startEditingKeyword(i)}
+                              >
+                                {keyword}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    removeKeyword(keyword)
+                                  }} 
+                                />
+                              </Badge>
+                            )
                           ))}
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <Label className="text-sm font-medium">Categories</Label>
-                      <div className="flex gap-2 mt-1.5">
+                      <Label className="text-xs font-medium">Categories</Label>
+                      <div className="flex gap-2 mt-1">
                         <Input
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
                           placeholder="Add category and press Enter"
                           onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCategory())}
+                          className="h-9 text-sm"
                         />
-                        <Button type="button" onClick={addCategory} variant="outline" size="icon">
+                        <Button type="button" onClick={addCategory} variant="outline" size="icon" className="h-9 w-9">
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
                       {formData.categories.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="flex flex-wrap gap-1.5 mt-2">
                           {formData.categories.map((category, i) => (
-                            <Badge key={i} variant="secondary" className="gap-1 px-3 py-1">
-                              {category}
-                              <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => removeCategory(category)} />
-                            </Badge>
+                            editingCategory?.index === i ? (
+                              <div key={i} className="flex gap-1">
+                                <Input
+                                  value={editingCategory.value}
+                                  onChange={(e) => setEditingCategory({ ...editingCategory, value: e.target.value })}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      saveCategoryEdit()
+                                    } else if (e.key === 'Escape') {
+                                      cancelCategoryEdit()
+                                    }
+                                  }}
+                                  className="h-7 text-xs w-32"
+                                  autoFocus
+                                />
+                              </div>
+                            ) : (
+                              <Badge 
+                                key={i} 
+                                variant="secondary" 
+                                className="gap-1 px-2 py-0.5 text-xs cursor-pointer hover:bg-secondary/80"
+                                onClick={() => startEditingCategory(i)}
+                              >
+                                {category}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    removeCategory(category)
+                                  }} 
+                                />
+                              </Badge>
+                            )
                           ))}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 pt-2">
+                    <div className="flex items-center space-x-2 pt-1">
                       <Checkbox
                         id="featured"
                         checked={formData.featured}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked as boolean }))}
                       />
-                      <Label htmlFor="featured" className="cursor-pointer text-sm font-medium">
+                      <Label htmlFor="featured" className="cursor-pointer text-xs font-medium">
                         Mark as Featured Article
                       </Label>
                     </div>
@@ -383,48 +520,51 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                 </AccordionItem>
 
                 {/* Authors Section */}
-                <AccordionItem value="authors" className="border rounded-lg px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionItem value="authors" className="border rounded-lg px-3 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <span className="font-semibold">Authors ({formData.authors.length})</span>
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Authors ({formData.authors.length})</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="space-y-4 pb-4 pt-2">
+                  <AccordionContent className="space-y-3 pb-3 pt-2">
                     {/* Add new author form */}
-                    <div className="p-4 border-2 border-dashed rounded-lg bg-muted/30">
-                      <Label className="text-sm font-medium mb-3 block">Add New Author</Label>
-                      <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 border-2 border-dashed rounded-lg bg-muted/30">
+                      <Label className="text-xs font-medium mb-2 block">Add New Author</Label>
+                      <div className="grid grid-cols-2 gap-2">
                         <Input
                           placeholder="Title (Dr., Prof., etc.)"
                           value={newAuthor.title}
                           onChange={(e) => setNewAuthor(prev => ({ ...prev, title: e.target.value }))}
-                          className="col-span-2 sm:col-span-1"
+                          className="col-span-2 sm:col-span-1 h-9 text-sm"
                         />
                         <Input
                           placeholder="First Name *"
                           value={newAuthor.firstName}
                           onChange={(e) => setNewAuthor(prev => ({ ...prev, firstName: e.target.value }))}
+                          className="h-9 text-sm"
                         />
                         <Input
                           placeholder="Last Name *"
                           value={newAuthor.lastName}
                           onChange={(e) => setNewAuthor(prev => ({ ...prev, lastName: e.target.value }))}
+                          className="h-9 text-sm"
                         />
                         <Input
                           placeholder="Email *"
                           type="email"
                           value={newAuthor.email}
                           onChange={(e) => setNewAuthor(prev => ({ ...prev, email: e.target.value }))}
+                          className="h-9 text-sm"
                         />
                         <Input
                           placeholder="Affiliation *"
                           value={newAuthor.affiliation}
                           onChange={(e) => setNewAuthor(prev => ({ ...prev, affiliation: e.target.value }))}
-                          className="col-span-2"
+                          className="col-span-2 h-9 text-sm"
                         />
                       </div>
-                      <Button type="button" onClick={addAuthor} variant="default" className="mt-3 w-full" size="sm">
+                      <Button type="button" onClick={addAuthor} variant="default" className="mt-2 w-full h-9 text-sm">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Author
                       </Button>
@@ -432,31 +572,31 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
 
                     {/* Current authors list */}
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Current Authors</Label>
+                      <Label className="text-xs font-medium mb-2 block">Current Authors</Label>
                       <div className="space-y-2">
                         {formData.authors.map((author, index) => (
-                          <div key={index} className="flex items-start justify-between p-3 border rounded-lg hover:border-primary/50 transition-colors bg-background">
+                          <div key={index} className="flex items-start justify-between p-2 border rounded-lg hover:border-primary/50 transition-colors bg-background">
                             <div className="flex-1">
-                              <p className="font-medium text-sm">
+                              <p className="font-medium text-xs">
                                 {author.title && <span className="text-muted-foreground">{author.title} </span>}
                                 {author.firstName} {author.lastName}
                               </p>
-                              <p className="text-sm text-muted-foreground mt-0.5">{author.email}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{author.affiliation}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{author.email}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{author.affiliation}</p>
                             </div>
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
                               onClick={() => removeAuthor(index)}
-                              className="hover:bg-destructive/10 hover:text-destructive"
+                              className="hover:bg-destructive/10 hover:text-destructive h-7 w-7"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         ))}
                         {formData.authors.length === 0 && (
-                          <p className="text-sm text-muted-foreground text-center py-6 border-2 border-dashed rounded-lg">
+                          <p className="text-xs text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
                             No authors added yet. Add at least one author above.
                           </p>
                         )}
@@ -466,38 +606,38 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                 </AccordionItem>
 
                 {/* Files Section */}
-                <AccordionItem value="files" className="border rounded-lg px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionItem value="files" className="border rounded-lg px-3 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
                     <div className="flex items-center gap-2">
-                      <Upload className="h-5 w-5 text-primary" />
-                      <span className="font-semibold">Files & Attachments</span>
+                      <Upload className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Files & Attachments</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="space-y-6 pb-4 pt-2">
+                  <AccordionContent className="space-y-4 pb-3 pt-2">
                     {/* Current Manuscript */}
                     <div>
-                      <Label className="text-sm font-medium">Current Manuscript</Label>
+                      <Label className="text-xs font-medium">Current Manuscript</Label>
                       {article?.manuscriptFile ? (
-                        <div className="flex items-center justify-between p-3 border rounded-lg mt-2 bg-muted/30">
+                        <div className="flex items-center justify-between p-2 border rounded-lg mt-1.5 bg-muted/30">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-primary/10 rounded">
-                              <FileText className="h-5 w-5 text-primary" />
+                              <FileText className="h-4 w-4 text-primary" />
                             </div>
                             <div>
-                              <p className="font-medium text-sm">{article.manuscriptFile.originalName}</p>
+                              <p className="font-medium text-xs">{article.manuscriptFile.originalName}</p>
                               <p className="text-xs text-muted-foreground mt-0.5">
                                 {article.manuscriptFile.format?.toUpperCase()} • {formatFileSize(article.manuscriptFile.bytes)}
                               </p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" asChild>
+                          <Button variant="outline" size="sm" asChild className="h-8">
                             <a href={article.manuscriptFile.secureUrl} target="_blank" rel="noopener noreferrer">
-                              <Download className="h-4 w-4" />
+                              <Download className="h-3.5 w-3.5" />
                             </a>
                           </Button>
                         </div>
                       ) : (
-                        <p className="text-sm text-muted-foreground mt-2 p-3 border-2 border-dashed rounded-lg text-center">
+                        <p className="text-xs text-muted-foreground mt-1.5 p-2 border-2 border-dashed rounded-lg text-center">
                           No manuscript uploaded
                         </p>
                       )}
@@ -505,7 +645,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
 
                     {/* Replace Manuscript */}
                     <div>
-                      <Label htmlFor="manuscript" className="text-sm font-medium">
+                      <Label htmlFor="manuscript" className="text-xs font-medium">
                         {article?.manuscriptFile ? 'Replace Manuscript' : 'Upload Manuscript'}
                       </Label>
                       <Input
@@ -513,12 +653,12 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                         type="file"
                         accept=".pdf,.doc,.docx"
                         onChange={(e) => setManuscriptFile(e.target.files?.[0] || null)}
-                        className="mt-1.5"
+                        className="mt-1 h-9 text-sm"
                       />
                       {manuscriptFile && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-primary/5 border border-primary/20 rounded">
+                        <div className="flex items-center gap-2 mt-1.5 p-2 bg-primary/5 border border-primary/20 rounded">
                           <AlertCircle className="h-4 w-4 text-primary" />
-                          <p className="text-sm text-primary">
+                          <p className="text-xs text-primary">
                             New file selected: {manuscriptFile.name}
                           </p>
                         </div>
@@ -529,16 +669,16 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
 
                     {/* Current Supplementary Files */}
                     <div>
-                      <Label className="text-sm font-medium">Supplementary Files</Label>
-                      <div className="space-y-2 mt-2">
+                      <Label className="text-xs font-medium">Supplementary Files</Label>
+                      <div className="space-y-2 mt-1.5">
                         {article?.supplementaryFiles?.map((file: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:border-primary/50 transition-colors">
-                            <div className="flex items-center gap-3 flex-1">
+                          <div key={index} className="flex items-center justify-between p-2 border rounded-lg hover:border-primary/50 transition-colors">
+                            <div className="flex items-center gap-2 flex-1">
                               <div className="p-2 bg-muted rounded">
                                 <FileText className="h-4 w-4 text-muted-foreground" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{file.originalName}</p>
+                                <p className="font-medium text-xs truncate">{file.originalName}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {file.format?.toUpperCase()} • {formatFileSize(file.bytes)}
                                 </p>
@@ -562,7 +702,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                           </div>
                         ))}
                         {(!article?.supplementaryFiles || article.supplementaryFiles.length === 0) && (
-                          <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
+                          <p className="text-xs text-muted-foreground text-center py-3 border-2 border-dashed rounded-lg">
                             No supplementary files
                           </p>
                         )}
@@ -571,19 +711,19 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
 
                     {/* Add Supplementary Files */}
                     <div>
-                      <Label htmlFor="supplementary" className="text-sm font-medium">Add Supplementary Files</Label>
+                      <Label htmlFor="supplementary" className="text-xs font-medium">Add Supplementary Files</Label>
                       <Input
                         id="supplementary"
                         type="file"
                         accept=".pdf,.zip,.csv,.xls,.xlsx"
                         multiple
                         onChange={(e) => setSupplementaryFiles(Array.from(e.target.files || []))}
-                        className="mt-1.5"
+                        className="mt-1 h-9 text-sm"
                       />
                       {supplementaryFiles.length > 0 && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-primary/5 border border-primary/20 rounded">
+                        <div className="flex items-center gap-2 mt-1.5 p-2 bg-primary/5 border border-primary/20 rounded">
                           <AlertCircle className="h-4 w-4 text-primary" />
-                          <p className="text-sm text-primary">
+                          <p className="text-xs text-primary">
                             {supplementaryFiles.length} new file(s) will be uploaded
                           </p>
                         </div>
@@ -593,86 +733,86 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                 </AccordionItem>
 
                 {/* Metadata Section */}
-                <AccordionItem value="metadata" className="border rounded-lg px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-4">
+                <AccordionItem value="metadata" className="border rounded-lg px-3 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <span className="font-semibold">Publication Metadata</span>
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Publication Metadata</span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="space-y-4 pb-4 pt-2">
-                    <div className="grid grid-cols-2 gap-4">
+                  <AccordionContent className="space-y-3 pb-3 pt-2">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="articleNumber" className="text-sm font-medium">Article Number</Label>
+                        <Label htmlFor="articleNumber" className="text-xs font-medium">Article Number</Label>
                         <Input
                           id="articleNumber"
                           value={formData.articleNumber}
                           onChange={(e) => setFormData(prev => ({ ...prev, articleNumber: e.target.value }))}
                           placeholder="001"
                           maxLength={3}
-                          className="mt-1.5"
+                          className="mt-1 h-9 text-sm"
                         />
                         <p className="text-xs text-muted-foreground mt-1">3-digit number</p>
                       </div>
 
                       <div>
-                        <Label htmlFor="pages" className="text-sm font-medium">Pages</Label>
+                        <Label htmlFor="pages" className="text-xs font-medium">Pages</Label>
                         <Input
                           id="pages"
                           value={formData.pages}
                           onChange={(e) => setFormData(prev => ({ ...prev, pages: e.target.value }))}
                           placeholder="1-15"
-                          className="mt-1.5"
+                          className="mt-1 h-9 text-sm"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="doi" className="text-sm font-medium">DOI</Label>
+                      <Label htmlFor="doi" className="text-xs font-medium">DOI</Label>
                       <Input
                         id="doi"
                         value={formData.doi}
                         onChange={(e) => setFormData(prev => ({ ...prev, doi: e.target.value }))}
                         placeholder="10.1234/example"
-                        className="mt-1.5"
+                        className="mt-1 h-9 text-sm"
                       />
                     </div>
 
                     <Separator />
 
                     <div>
-                      <Label htmlFor="funding" className="text-sm font-medium">Funding Information</Label>
+                      <Label htmlFor="funding" className="text-xs font-medium">Funding Information</Label>
                       <Textarea
                         id="funding"
                         value={formData.funding}
                         onChange={(e) => setFormData(prev => ({ ...prev, funding: e.target.value }))}
                         placeholder="Enter funding information"
-                        rows={3}
-                        className="mt-1.5"
+                        rows={2}
+                        className="mt-1 text-sm"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="acknowledgments" className="text-sm font-medium">Acknowledgments</Label>
+                      <Label htmlFor="acknowledgments" className="text-xs font-medium">Acknowledgments</Label>
                       <Textarea
                         id="acknowledgments"
                         value={formData.acknowledgments}
                         onChange={(e) => setFormData(prev => ({ ...prev, acknowledgments: e.target.value }))}
                         placeholder="Enter acknowledgments"
-                        rows={3}
-                        className="mt-1.5"
+                        rows={2}
+                        className="mt-1 text-sm"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="conflictOfInterest" className="text-sm font-medium">Conflict of Interest</Label>
+                      <Label htmlFor="conflictOfInterest" className="text-xs font-medium">Conflict of Interest</Label>
                       <Textarea
                         id="conflictOfInterest"
                         value={formData.conflictOfInterest}
                         onChange={(e) => setFormData(prev => ({ ...prev, conflictOfInterest: e.target.value }))}
                         placeholder="Enter conflict of interest statement"
-                        rows={3}
-                        className="mt-1.5"
+                        rows={2}
+                        className="mt-1 text-sm"
                       />
                     </div>
                   </AccordionContent>
@@ -682,24 +822,26 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
           </ScrollArea>
         )}
 
-        <SheetFooter className="px-6 py-4 border-t bg-muted/30">
-          <div className="flex items-center justify-between w-full gap-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving} size="lg">
+        <SheetFooter className="px-4 py-3 border-t bg-muted/30">
+          <div className="flex items-center justify-between w-full gap-3">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving || loading} size="lg" className="min-w-[140px]">
-              {saving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
+            {article && (
+              <Button onClick={handleSave} disabled={saving || loading} className="min-w-[120px]">
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </SheetFooter>
       </SheetContent>

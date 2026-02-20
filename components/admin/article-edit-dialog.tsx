@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -279,12 +279,12 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none m-0 rounded-none p-0 flex flex-col overflow-hidden">
-        <DialogHeader className="px-4 py-3 border-b bg-muted/30 shrink-0">
-          <DialogTitle className="text-lg">Edit Article</DialogTitle>
-          <DialogDescription className="text-xs">Update article details, metadata, and files</DialogDescription>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-full md:max-w-3xl lg:max-w-4xl p-0 gap-0 flex flex-col">
+        <SheetHeader className="px-6 py-4 border-b bg-muted/30 shrink-0">
+          <SheetTitle className="text-lg">Edit Article</SheetTitle>
+          <SheetDescription className="text-xs">Update article details, metadata, and files</SheetDescription>
+        </SheetHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-12 flex-1">
@@ -308,10 +308,10 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
             </div>
           </div>
         ) : (
-          <ScrollArea className="flex-1 px-4">
-            <div className="space-y-4 py-4 max-w-4xl mx-auto">
+          <ScrollArea className="flex-1">
+            <div className="space-y-4 p-6">
               {/* Status and Type Quick Access */}
-              <div className="grid grid-cols-2 gap-3 p-3 border rounded-lg bg-muted/30">
+              <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/30">
                 <div>
                   <Label htmlFor="status" className="text-xs font-medium">Status</Label>
                   <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
@@ -531,7 +531,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
                     {/* Add new author form */}
                     <div className="p-3 border-2 border-dashed rounded-lg bg-muted/30">
                       <Label className="text-xs font-medium mb-2 block">Add New Author</Label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         <Input
                           placeholder="Title (Dr., Prof., etc.)"
                           value={newAuthor.title}
@@ -822,7 +822,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
           </ScrollArea>
         )}
 
-        <DialogFooter className="px-4 py-3 border-t bg-muted/30 shrink-0">
+        <SheetFooter className="px-6 py-4 border-t bg-muted/30 shrink-0 mt-auto">
           <div className="flex items-center justify-between w-full gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancel
@@ -843,8 +843,8 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
               </Button>
             )}
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

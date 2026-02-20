@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -279,12 +279,12 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-full md:max-w-3xl lg:max-w-4xl p-0 gap-0 flex flex-col">
-        <SheetHeader className="px-6 py-4 border-b bg-muted/30 shrink-0">
-          <SheetTitle className="text-lg">Edit Article</SheetTitle>
-          <SheetDescription className="text-xs">Update article details, metadata, and files</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="top-0 left-0 translate-x-0 translate-y-0 inset-0 w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 gap-0 flex flex-col">
+        <DialogHeader className="px-6 py-4 border-b bg-muted/30 shrink-0">
+          <DialogTitle className="text-lg">Edit Article</DialogTitle>
+          <DialogDescription className="text-xs">Update article details, metadata, and files</DialogDescription>
+        </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-12 flex-1">
@@ -822,7 +822,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
           </ScrollArea>
         )}
 
-        <SheetFooter className="px-6 py-4 border-t bg-muted/30 shrink-0 mt-auto">
+        <DialogFooter className="px-6 py-4 border-t bg-muted/30 shrink-0 mt-auto">
           <div className="flex items-center justify-between w-full gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancel
@@ -843,8 +843,8 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
               </Button>
             )}
           </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

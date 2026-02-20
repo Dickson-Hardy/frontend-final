@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -279,12 +279,12 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-2xl overflow-hidden p-0 flex flex-col">
-        <SheetHeader className="px-4 py-3 border-b bg-muted/30">
-          <SheetTitle className="text-lg">Edit Article</SheetTitle>
-          <SheetDescription className="text-xs">Update article details, metadata, and files</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-screen h-screen max-w-none max-h-none m-0 rounded-none p-0 flex flex-col overflow-hidden">
+        <DialogHeader className="px-4 py-3 border-b bg-muted/30 shrink-0">
+          <DialogTitle className="text-lg">Edit Article</DialogTitle>
+          <DialogDescription className="text-xs">Update article details, metadata, and files</DialogDescription>
+        </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-12 flex-1">
@@ -309,7 +309,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
           </div>
         ) : (
           <ScrollArea className="flex-1 px-4">
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-w-4xl mx-auto">
               {/* Status and Type Quick Access */}
               <div className="grid grid-cols-2 gap-3 p-3 border rounded-lg bg-muted/30">
                 <div>
@@ -822,7 +822,7 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
           </ScrollArea>
         )}
 
-        <SheetFooter className="px-4 py-3 border-t bg-muted/30">
+        <DialogFooter className="px-4 py-3 border-t bg-muted/30 shrink-0">
           <div className="flex items-center justify-between w-full gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancel
@@ -843,8 +843,8 @@ export function ArticleEditDialog({ articleId, open, onOpenChange, onSuccess }: 
               </Button>
             )}
           </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
